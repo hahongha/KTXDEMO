@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Chào mừng đến với Ký túc xá <span th:text="${tenKTX}"></span></h1>
+        </div>
+        <div class="content">
+            <p>Xin chào <span th:text="${studentName}"></span>,</p>
+            <p>Tài khoản của bạn tại Ký túc xá <span th:text="${tenKTX}"></span> đã được tạo thành công. Dưới đây là thông tin đăng nhập của bạn:</p>
+            <p><strong>Email:</strong> <span th:text="${username}"></span></p>
+            <p><strong>Mật khẩu:</strong> <span th:text="${userpassword}"></span></p>
+            <p>Chúng tôi khuyến nghị bạn thay đổi mật khẩu sau khi đăng nhập lần đầu tiên để đảm bảo tính bảo mật.</p>
+            <p>Vui lòng liên hệ với ban quản lý ký túc xá nếu bạn có bất kỳ thắc mắc nào.</p>
+            <p>Chúc bạn có những trải nghiệm tốt đẹp tại Ký túc xá!</p>
+        </div>
+        <div class="footer">
+            <p>Trân trọng,</p>
+            <p>Ban Quản Lý Ký túc xá <span th:text="${tenKTX}"></span></p>
+        </div>
+    </div>
+</body>
+</html>
