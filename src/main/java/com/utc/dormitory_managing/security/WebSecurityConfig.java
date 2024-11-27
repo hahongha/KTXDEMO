@@ -64,7 +64,7 @@ public class WebSecurityConfig {
     .cors(cors -> cors.disable())
     .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-//        .authorizeHttpRequests(auth -> 
+//        .authorizeHttpRequests((auth) -> 
 //          auth.requestMatchers("/", "/favicon.ico", "/**/*.png", "/**/*.gif", "/**/*.svg", "/**/*.jpg", "/**/*.html",
 //					"/**/*.css", "/**/*.js", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/auth/**"
 //				).permitAll()
