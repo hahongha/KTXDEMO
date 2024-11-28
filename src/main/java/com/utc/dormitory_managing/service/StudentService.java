@@ -1,5 +1,6 @@
 package com.utc.dormitory_managing.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,7 +19,9 @@ import org.zalando.problem.Status;
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.configuration.ApplicationProperties;
 import com.utc.dormitory_managing.dto.ResponseDTO;
+import com.utc.dormitory_managing.dto.RoomDTO;
 import com.utc.dormitory_managing.dto.SearchDTO;
+import com.utc.dormitory_managing.dto.Student2DTO;
 import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
 import com.utc.dormitory_managing.entity.Student;
@@ -33,6 +36,7 @@ public interface StudentService {
 	Boolean delete(String id);
 	StudentDTO get(String id);
 	List<StudentDTO> getAll();
+	List<Student2DTO> getAll2();
 	StudentDTO updateStatus(StudentDTO studentDTO);
 	ResponseDTO<List<Student>> search(SearchDTO searchDTO);
 }
@@ -144,6 +148,37 @@ class StudentServiceImpl implements StudentService {
 	@Override
 	public StudentDTO updateStatus(StudentDTO studentDTO) {
 		return null;
+	}
+
+	@Override
+	public List<Student2DTO> getAll2() {
+		try {
+			List<Student2DTO> s = new ArrayList<Student2DTO>();
+			ModelMapper mapper = new ModelMapper();
+			
+			List<Student> students = studentRepo.findAll();
+			System.err.println(students.size());
+			if(students.size()==0) return s;
+			for (Student student : students) {
+				StudentDTO studentDTO = new StudentDTO();
+				UserDTO userDTO = new UserDTO();
+				RoomDTO roomDTO = new RoomDTO();
+				studentDTO = mapper.map(student, StudentDTO.class);
+				
+				if(student.getUser()!= null)
+					userDTO = mapper.map(student.getUser(), UserDTO.class);
+				if(student.getRoom()!= null)
+					roomDTO = mapper.map(student.getRoom(), RoomDTO.class);
+				Student2DTO s2 = new Student2DTO(studentDTO, roomDTO, userDTO);
+				s.add(s2);
+//				System.err.println(student.toString());
+			}
+			return s;
+		} catch (ResourceAccessException e) {
+			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
+		} catch (HttpServerErrorException | HttpClientErrorException e) {
+			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
+		}
 	}
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.ResponseDTO;
+import com.utc.dormitory_managing.dto.Student2DTO;
 import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.service.StudentService;
 
@@ -42,6 +43,12 @@ public class StudentAPI {
 	@GetMapping("/getAll")
 	public ResponseDTO<List<StudentDTO>> getAll() {
 		return ResponseDTO.<List<StudentDTO>>builder().code(String.valueOf(HttpStatus.OK.value())).data(studentService.getAll())
+				.build();
+	}
+	
+	@GetMapping("/getAll2")
+	public ResponseDTO<List<Student2DTO>> getAll2() {
+		return ResponseDTO.<List<Student2DTO>>builder().code(String.valueOf(HttpStatus.OK.value())).data(studentService.getAll2())
 				.build();
 	}
 	
