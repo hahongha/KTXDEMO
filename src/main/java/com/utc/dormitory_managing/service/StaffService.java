@@ -1,5 +1,7 @@
 package com.utc.dormitory_managing.service;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,6 +20,7 @@ import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.configuration.ApplicationProperties;
 import com.utc.dormitory_managing.dto.StaffDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
+import com.utc.dormitory_managing.dto.UserResponse;
 import com.utc.dormitory_managing.entity.Staff;
 import com.utc.dormitory_managing.entity.User;
 import com.utc.dormitory_managing.repository.StaffRepo;
@@ -74,6 +77,8 @@ class StaffServiceImpl implements StaffService {
 			User user = StaffOptional.get().getUser();
 			Staff.setUser(user);
 			StaffRepo.save(Staff);
+			UserResponse userResponse = mapper.map(user, UserResponse.class);
+			StaffDTO.setUserResponse(userResponse);
 			return StaffDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -102,7 +107,10 @@ class StaffServiceImpl implements StaffService {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Staff> StaffOptional = StaffRepo.findById(id);
 			if(StaffOptional.isEmpty()) throw new BadRequestAlertException("Not Found Staff", "Staff", "missing");
-			return mapper.map(StaffOptional.get(), StaffDTO.class);
+			StaffDTO staffDTO = mapper.map(StaffOptional.get(), StaffDTO.class);
+			UserResponse userResponse = mapper.map(StaffOptional.get().getUser(), UserResponse.class);
+			staffDTO.setUserResponse(userResponse);
+			return staffDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -117,8 +125,12 @@ class StaffServiceImpl implements StaffService {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			List<Staff> Staffs = StaffRepo.findAll();
-			return Staffs.stream().map(s -> mapper.map(s, StaffDTO.class))
-					.collect(Collectors.toList());
+			List<StaffDTO> staffDTOs = new ArrayList<StaffDTO>();
+			for (Staff staff : Staffs) {
+				StaffDTO staffDTO = get(staff.getStaffId());
+				staffDTOs.add(staffDTO);
+			}
+			return staffDTOs;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {

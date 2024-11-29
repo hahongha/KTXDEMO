@@ -39,6 +39,13 @@ public class RoomAPI {
 		return ResponseDTO.<RoomDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(RoomService.get(id))
 				.build();
 	}
+	
+	@GetMapping("/getName/{name}")
+	public ResponseDTO<RoomDTO> getName(@PathVariable(value = "name") String name) {
+		return ResponseDTO.<RoomDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(RoomService.getByName(name))
+				.build();
+	}
+	
 	@GetMapping("/getAll")
 	public ResponseDTO<List<RoomDTO>> getAll() {
 		return ResponseDTO.<List<RoomDTO>>builder().code(String.valueOf(HttpStatus.OK.value())).data(RoomService.getAll())

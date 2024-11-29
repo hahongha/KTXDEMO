@@ -41,8 +41,8 @@ public class StudentDTO {
 	
 	private int studentStatus;
 	
-//	private String roomName;
-//	
-//	private UserDTO userDTO;
+	private String roomName;
+	
+	private UserResponse userResponse;
 	
 }

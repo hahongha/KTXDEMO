@@ -24,8 +24,11 @@ import com.utc.dormitory_managing.dto.SearchDTO;
 import com.utc.dormitory_managing.dto.Student2DTO;
 import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
+import com.utc.dormitory_managing.dto.UserResponse;
+import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.entity.User;
+import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.StudentRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.utils.Utils;
@@ -51,12 +54,14 @@ class StudentServiceImpl implements StudentService {
 	@Autowired
 	private ApplicationProperties props;
 	
+	@Autowired
+	private RoomRepo roomRepo;
+	
 	@Override
 	public StudentDTO create(StudentDTO studentDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Student> studentOptional = studentRepo.findById(studentDTO.getStudentId());
-//			if(studentOptional.isPresent()) throw new BadRequestAlertException("Student is present", "student", "missing");
 			Student student = mapper.map(studentDTO, Student.class);
 			UserDTO userDTO = new UserDTO();
 			userDTO.setUserId(UUID.randomUUID().toString().replaceAll("-", ""));
@@ -68,6 +73,10 @@ class StudentServiceImpl implements StudentService {
 			User user = mapper.map(userDTO, User.class);
 			userRepo.save(user);
 			student.setUser(user);
+			if(studentDTO.getRoomName()!= null || !studentDTO.getRoomName().isBlank()) {
+				Optional<Room> roomOP = roomRepo.findByRoomName(studentDTO.getRoomName());
+				if(roomOP.isPresent()) student.setRoom(roomOP.get());
+			}
 			studentRepo.save(student);
 			return studentDTO;
 		} catch (ResourceAccessException e) {
@@ -86,6 +95,15 @@ class StudentServiceImpl implements StudentService {
 			Student student = mapper.map(studentDTO, Student.class);
 			User user = studentOptional.get().getUser();
 			student.setUser(user);
+			if(studentDTO.getRoomName()== null || studentDTO.getRoomName().isBlank()) {
+				student.setRoom(null);
+			}else {
+				
+				Optional<Room> roomOP = roomRepo.findByRoomName(studentDTO.getRoomName());
+				if(roomOP.isPresent()) student.setRoom(roomOP.get());
+			}
+			UserResponse userResponse = mapper.map(user, UserResponse.class);
+			studentDTO.setUserResponse(userResponse);
 			studentRepo.save(student);
 			return studentDTO;
 		} catch (ResourceAccessException e) {
@@ -112,10 +130,17 @@ class StudentServiceImpl implements StudentService {
 	@Override
 	public StudentDTO get(String id) {
 		try {
+			StudentDTO student = new StudentDTO();
 			ModelMapper mapper = new ModelMapper();
 			Optional<Student> studentOptional = studentRepo.findById(id);
 			if(studentOptional.isEmpty()) throw new BadRequestAlertException("Not Found Student", "student", "missing");
-			return mapper.map(studentOptional.get(), StudentDTO.class);
+			student = mapper.map(studentOptional.get(), StudentDTO.class);
+			if(studentOptional.get().getRoom()!= null) {
+				student.setRoomName(studentOptional.get().getRoom().getRoomName());
+			}
+			UserResponse userResponse = mapper.map(studentOptional.get().getUser(), UserResponse.class);
+			student.setUserResponse(userResponse);
+			return student;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -130,8 +155,14 @@ class StudentServiceImpl implements StudentService {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			List<Student> students = studentRepo.findAll();
-			return students.stream().map(s -> mapper.map(s, StudentDTO.class))
-					.collect(Collectors.toList());
+			List<StudentDTO> studentDTOs = new ArrayList<StudentDTO>();
+//			= students.stream().map(s -> mapper.map(s, StudentDTO.class))
+//					.collect(Collectors.toList());
+			for (Student student : students) {
+				StudentDTO studentDTO = get(student.getStudentId());
+				studentDTOs.add(studentDTO);
+			}
+			return studentDTOs;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -171,7 +202,6 @@ class StudentServiceImpl implements StudentService {
 					roomDTO = mapper.map(student.getRoom(), RoomDTO.class);
 				Student2DTO s2 = new Student2DTO(studentDTO, roomDTO, userDTO);
 				s.add(s2);
-//				System.err.println(student.toString());
 			}
 			return s;
 		} catch (ResourceAccessException e) {

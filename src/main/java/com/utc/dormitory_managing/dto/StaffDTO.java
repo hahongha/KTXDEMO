@@ -33,4 +33,6 @@ public class StaffDTO {
 	
 	private String staffEmail;
 	
+	private UserResponse userResponse;
+	
 }

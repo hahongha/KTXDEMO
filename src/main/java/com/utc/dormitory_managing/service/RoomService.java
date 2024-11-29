@@ -31,6 +31,7 @@ public interface RoomService {
 	Boolean delete(String id);
 	RoomDTO get(String id);
 	List<RoomDTO> getAll();
+	RoomDTO getByName(String name);
 	
 	Long checkRoomNumber(RoomType roomType, Boolean gender);
 }
@@ -133,6 +134,20 @@ class RoomServiceImpl implements RoomService {
 		try {
 			Long roomTypeNumber = RoomRepo.getRoomNumber(roomType.getRoomTypeId(), gender) * roomType.getRoomTypeNumber();
 			return roomTypeNumber;
+		} catch (ResourceAccessException e) {
+			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
+		} catch (HttpServerErrorException | HttpClientErrorException e) {
+			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
+		}
+	}
+
+	@Override
+	public RoomDTO getByName(String name) {
+		try {
+			ModelMapper mapper = new ModelMapper();
+			Optional<Room> RoomOptional = RoomRepo.findByRoomName(name);
+			if(RoomOptional.isEmpty()) throw new BadRequestAlertException("Not Found Room", "Room", "missing");
+			return mapper.map(RoomOptional.get(), RoomDTO.class);
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
