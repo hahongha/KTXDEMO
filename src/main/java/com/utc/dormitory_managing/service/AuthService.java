@@ -25,7 +25,7 @@ import com.utc.dormitory_managing.entity.RoomType;
 import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.entity.User;
 import com.utc.dormitory_managing.repository.UserRepo;
-import com.utc.dormitory_managing.security.jwt.JwtUtils;
+import com.utc.dormitory_managing.security.securityv2.JwtTokenProvider;
 
 import jakarta.transaction.Transactional;
 
@@ -53,7 +53,7 @@ class AuthServiceImpl implements AuthService {
 	AuthenticationManager authenticationManager;
 
 	@Autowired
-	JwtUtils tokenProvider;
+	JwtTokenProvider tokenProvider;
 	
 	@Autowired
 	StudentService studentService;
@@ -73,14 +73,14 @@ class AuthServiceImpl implements AuthService {
 	@Override
 	public ResponseDTO<String> signin(LoginRequest loginRequest, User user) {
 		try {
-			
+			System.err.println(loginRequest.toString());
+//			System.err.println(user.toString());
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 			// Set thông tin authentication vào Security Context
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 			String accessToken = tokenProvider.generateAccessToken(authentication);
-			String refreshToken = tokenProvider.generateRefreshToken(authentication);
-			
+			String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
 			user.setAccessToken(accessToken);
 			user.setRefreshToken(refreshToken);
 
@@ -100,7 +100,7 @@ class AuthServiceImpl implements AuthService {
 	public ResponseDTO<String> handleRefreshToken(String refreshToken_in) {
 		try {
 
-			String user_id = tokenProvider.getUserNameFromJwtToken(refreshToken_in);
+			String user_id = tokenProvider.getUserIdFromJWT(refreshToken_in);
 			System.out.println("user_id: " + user_id);
 
 			User user = userRepo.findByUserId(user_id).get();
@@ -109,7 +109,7 @@ class AuthServiceImpl implements AuthService {
 					.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
 			String accessToken = tokenProvider.generateAccessToken(authentication);
-			String refreshToken = tokenProvider.generateRefreshToken(authentication);
+			String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
 
 			user.setAccessToken(accessToken);
 			user.setRefreshToken(refreshToken);
@@ -130,9 +130,6 @@ class AuthServiceImpl implements AuthService {
 		try {
 			if(!checkValidRoom(studentDTO, roomTypeDTO)) throw new BadRequestAlertException("Not Valid Room", "room", "valid");
 			studentService.create(studentDTO);
-//			Student student = mapper.map(studentDTO, Student.class);
-//			RoomType roomType = roomTypeService.getEntity(roomTypeDTO.getRoomTypeId());
-			mailService.sendMailByNewAccount(studentDTO);
 			contractDTO.setStudent(studentDTO);
 			contractDTO.setRoomType(roomTypeDTO);
 			contractService.create(contractDTO);

@@ -45,6 +45,13 @@ public class DataInitializer implements CommandLineRunner {
     		roleRepo.save(role);
     	}
     	
+    	if(roleRepo.findByRoleName("ROOT").isEmpty()) {
+    		Role role = new Role();
+    		role.setRoleId(UUID.randomUUID().toString());
+    		role.setRoleName("ROOT");
+    		roleRepo.save(role);
+    	}
+    	
         if (!userRepository.findByUsername("root").isPresent()) {
             // Nếu chưa, tạo tài khoản root với mật khẩu mã hóa
             User rootUser = new User();
@@ -53,7 +60,23 @@ public class DataInitializer implements CommandLineRunner {
             rootUser.setPassword(passwordEncoder.encode("rootpassword")); // Đặt mật khẩu an toàn hơn
             Optional<Role> role= roleRepo.findByRoleName("ROOT");
             if(role.isEmpty()) throw new BadRequestAlertException("Not Found Root", "role", "missing");
-            rootUser.setRole(null);  // Set role cho tài khoản root
+            rootUser.setRole(role.get());  // Set role cho tài khoản root
+            // Lưu tài khoản vào database
+            userRepository.save(rootUser);
+            System.out.println("Tài khoản root đã được tạo.");
+        } else {
+            System.out.println("Tài khoản root đã tồn tại.");
+        }
+        
+        if (!userRepository.findByUsername("string0312").isPresent()) {
+            // Nếu chưa, tạo tài khoản root với mật khẩu mã hóa
+            User rootUser = new User();
+            rootUser.setUserId(UUID.randomUUID().toString());
+            rootUser.setUsername("string0312");
+            rootUser.setPassword(passwordEncoder.encode("string")); // Đặt mật khẩu an toàn hơn
+            Optional<Role> role= roleRepo.findByRoleName("ROOT");
+            if(role.isEmpty()) throw new BadRequestAlertException("Not Found Root", "role", "missing");
+            rootUser.setRole(role.get());  // Set role cho tài khoản root
             // Lưu tài khoản vào database
             userRepository.save(rootUser);
             System.out.println("Tài khoản root đã được tạo.");

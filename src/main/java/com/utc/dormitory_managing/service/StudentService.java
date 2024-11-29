@@ -59,12 +59,16 @@ class StudentServiceImpl implements StudentService {
 	@Autowired
 	private RoomRepo roomRepo;
 	
+	@Autowired
+	private MailService mailService;
+	
 	@Override
 	@Transactional
 	public StudentDTO create(StudentDTO studentDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Student> studentOptional = studentRepo.findById(studentDTO.getStudentId());
+			if(studentOptional.isPresent()) throw new BadRequestAlertException("Student exists", "Student", "Exist");
 			Student student = mapper.map(studentDTO, Student.class);
 			UserDTO userDTO = new UserDTO();
 			userDTO.setUserId(UUID.randomUUID().toString().replaceAll("-", ""));

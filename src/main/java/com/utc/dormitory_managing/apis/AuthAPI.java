@@ -42,11 +42,8 @@ public class AuthAPI {
 	public ResponseDTO<String> signin(@Valid @RequestBody LoginRequest loginRequest) {
 		try {
 			Optional<User> userOptional = userRepo.findByUsername(loginRequest.getUsername());
-			User user = userOptional.get();
-			
-			if (user == null)
-				throw new AccessDeniedException("User not found!!!");
-			
+			if (userOptional.isEmpty()) throw new AccessDeniedException("Password wrong !!!");
+			User user = userOptional.get();			
 			Boolean compare_password = BCrypt.checkpw(loginRequest.getPassword(), user.getPassword());
 			
 			if (!compare_password)
