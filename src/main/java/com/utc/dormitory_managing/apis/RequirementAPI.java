@@ -55,8 +55,9 @@ public class RequirementAPI {
 		return ResponseDTO.<Void>builder().code(String.valueOf(HttpStatus.OK.value())).build();
 	}
 	
-	@PutMapping("")
-	public ResponseDTO<RequirementDTO> update(@RequestBody RequirementDTO RequirementDTO) throws URISyntaxException {
+	@PutMapping("/{id}")
+	public ResponseDTO<RequirementDTO> update(@PathVariable(value = "id") String id,@RequestBody RequirementDTO RequirementDTO) throws URISyntaxException {
+		RequirementDTO.setRequirementId(id);
 		RequirementService.update(RequirementDTO);
 		return ResponseDTO.<RequirementDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(RequirementDTO).build();
 

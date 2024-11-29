@@ -134,8 +134,8 @@ class AuthServiceImpl implements AuthService {
 			Student student = mapper.map(studentDTO, Student.class);
 			RoomType roomType = roomTypeService.getEntity(roomTypeDTO.getRoomTypeId());
 			mailService.sendMailByNewAccount(studentDTO);
-			contractDTO.setStudent(student);
-			contractDTO.setRoomType(roomType);
+			contractDTO.setStudent(studentDTO);
+			contractDTO.setRoomType(roomTypeDTO);
 			contractService.create(contractDTO);
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).build();
 		} catch (ResourceAccessException e) {

@@ -14,10 +14,17 @@ import org.springframework.web.client.ResourceAccessException;
 import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
+import com.utc.dormitory_managing.apis.StaffAPI;
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.RequirementDTO;
 import com.utc.dormitory_managing.entity.Requirement;
+import com.utc.dormitory_managing.entity.Staff;
+import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.repository.RequirementRepo;
+import com.utc.dormitory_managing.repository.StaffRepo;
+import com.utc.dormitory_managing.repository.StudentRepo;
+
+import jakarta.persistence.NoResultException;
 public interface RequirementService {
 	RequirementDTO create(RequirementDTO RequirementDTO);
 	RequirementDTO update(RequirementDTO RequirementDTO);
@@ -31,11 +38,23 @@ class RequirementServiceImpl implements RequirementService {
 	@Autowired
 	private RequirementRepo RequirementRepo;
 	
+	@Autowired
+	private StudentRepo studentRepo;
+	
+	@Autowired
+	private StaffRepo staffRepo;
+	
 	@Override
 	public RequirementDTO create(RequirementDTO RequirementDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Requirement Requirement = mapper.map(RequirementDTO, Requirement.class);
+			Student student = studentRepo.findById(RequirementDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
+			Requirement.setStudent(student);
+			if(RequirementDTO.getStaff() !=null) {
+				Staff staff = staffRepo.findById(RequirementDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
+				Requirement.setStaff(staff);
+			}else Requirement.setStaff(null);
 			Requirement.setRequirementId(UUID.randomUUID().toString());
 			RequirementRepo.save(Requirement);
 			return RequirementDTO;
@@ -53,6 +72,12 @@ class RequirementServiceImpl implements RequirementService {
 			Optional<Requirement> RequirementOptional = RequirementRepo.findById(RequirementDTO.getRequirementId());
 			if(RequirementOptional.isEmpty()) throw new BadRequestAlertException("Not Found Requirement", "Requirement", "missing");
 			Requirement Requirement = mapper.map(RequirementDTO, Requirement.class);
+			Student student = studentRepo.findById(RequirementDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
+			Requirement.setStudent(student);
+			if(RequirementDTO.getStaff() !=null) {
+				Staff staff = staffRepo.findById(RequirementDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
+				Requirement.setStaff(staff);
+			}else Requirement.setStaff(null);
 			RequirementRepo.save(Requirement);
 			return RequirementDTO;
 		} catch (ResourceAccessException e) {

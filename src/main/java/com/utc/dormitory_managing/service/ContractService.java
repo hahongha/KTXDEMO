@@ -20,15 +20,23 @@ import com.utc.dormitory_managing.configuration.ApplicationProperties.StatusCont
 import com.utc.dormitory_managing.dto.ContractDTO;
 import com.utc.dormitory_managing.entity.Contract;
 import com.utc.dormitory_managing.entity.RoomType;
+import com.utc.dormitory_managing.entity.Staff;
+import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.repository.ContractRepo;
+import com.utc.dormitory_managing.repository.RoomTypeRepo;
+import com.utc.dormitory_managing.repository.StaffRepo;
+import com.utc.dormitory_managing.repository.StudentRepo;
 import com.utc.dormitory_managing.utils.Utils;
 import com.utc.dormitory_managing.utils.Utils.DateRange;
+
+import jakarta.persistence.NoResultException;
 
 public interface ContractService {
 	ContractDTO create(ContractDTO contractDTO);
 	ContractDTO update(ContractDTO contractDTO);
 	Boolean delete(String id);
 	ContractDTO get(String id);
+	
 	List<ContractDTO> getAll();
 	ContractDTO updateStatus(ContractDTO contractDTO, String status);
 	//kiem tra so luong hop dong con dang hoat dong
@@ -44,15 +52,33 @@ class ContractServiceImpl implements ContractService {
 	@Autowired
 	private ContractRepo ContractRepo;
 	
+	@Autowired
+	private StudentRepo studentRepo;
+	
+	@Autowired
+	private RoomTypeRepo roomTypeRepo;
+	
+	@Autowired
+	private StaffRepo staffRepo;
+	
 	@Override
-	public ContractDTO create(ContractDTO ContractDTO) {
+	public ContractDTO create(ContractDTO contractDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
-			Contract Contract = mapper.map(ContractDTO, Contract.class);
-			Contract.setContractId(UUID.randomUUID().toString());
-			Contract.setContractStatus(StatusContractRef.WAITING.toString());
-			ContractRepo.save(Contract);
-			return ContractDTO;
+			Contract contract = mapper.map(contractDTO, Contract.class);
+			Student student = studentRepo.findById(contractDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
+			contract.setStudent(student);
+			if(contractDTO.getStaff()!=null) {
+				Staff staff = staffRepo.findById(contractDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
+				contract.setStaff(staff);
+			}else contract.setStaff(null);
+			RoomType roomType = roomTypeRepo.findById(contractDTO.getRoomType().getRoomTypeId()).orElseThrow(NoResultException::new);
+			contract.setRoomType(roomType);
+			contract.setContractId(UUID.randomUUID().toString());
+			contract.setContractStatus(StatusContractRef.WAITING.toString());
+			ContractRepo.save(contract);
+			contractDTO = mapper.map(contract, ContractDTO.class);
+			return contractDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -66,8 +92,16 @@ class ContractServiceImpl implements ContractService {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Contract> ContractOptional = ContractRepo.findById(ContractDTO.getContractId());
 			if(ContractOptional.isEmpty()) throw new BadRequestAlertException("Not Found Contract", "Contract", "missing");
-			Contract Contract = mapper.map(ContractDTO, Contract.class);
-			ContractRepo.save(Contract);
+			Contract contract = mapper.map(ContractDTO, Contract.class);
+			Student student = studentRepo.findById(ContractDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
+			contract.setStudent(student);
+			if(ContractDTO.getStaff()!=null) {
+				Staff staff = staffRepo.findById(ContractDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
+				contract.setStaff(staff);
+			}else contract.setStaff(null);
+			RoomType roomType = roomTypeRepo.findById(ContractDTO.getRoomType().getRoomTypeId()).orElseThrow(NoResultException::new);
+			contract.setRoomType(roomType);
+			ContractRepo.save(contract);
 			return ContractDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -98,7 +132,8 @@ class ContractServiceImpl implements ContractService {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Contract> ContractOptional = ContractRepo.findById(id);
 			if(ContractOptional.isEmpty()) throw new BadRequestAlertException("Not Found Contract", "Contract", "missing");
-			return mapper.map(ContractOptional.get(), ContractDTO.class);
+			ContractDTO contractDTO = mapper.map(ContractOptional.get(), ContractDTO.class);
+			return contractDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -163,6 +198,4 @@ class ContractServiceImpl implements ContractService {
 			updateStatus(contractDTO2, StatusContractRef.SUSPEND.toString());
 		}
 	}
-
-
 }

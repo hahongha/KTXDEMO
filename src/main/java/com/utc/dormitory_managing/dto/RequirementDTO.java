@@ -27,9 +27,9 @@ public class RequirementDTO {
 	private String requirementDes;
 	
 	//nguoi khieu nai
-	private Student student;
+	private StudentDTO student;
 	
-	private Staff staff;
+	private StaffDTO staff;
 	
 	//trang thai da xu li hay chua
 	private String status;

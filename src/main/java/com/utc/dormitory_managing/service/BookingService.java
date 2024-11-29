@@ -108,11 +108,11 @@ class BookingServiceImpl implements BookingService {
 			Student student = studentRepo.findById(studentDTO.getStudentId()).orElseThrow(NoResultException::new);
 			if(!checkValidRoom(roomTypeDTO, studentDTO.getStudentGender())) return new String("RoomType is Full");
 			ContractDTO contractDTO = new ContractDTO();
-			contractDTO.setStudent(student);
+			contractDTO.setStudent(studentDTO);
 			contractDTO.setStartDate(new Date());
 			contractDTO.setEndDate(Utils.setTimeContract());
 			RoomType roomType = roomTypeRepo.findById(roomTypeDTO.getRoomTypeId()).orElseThrow(NoResultException::new);
-			contractDTO.setRoomType(roomType);
+			contractDTO.setRoomType(roomTypeDTO);
 			contractDTO.setContractStatus(StatusContractRef.WAITING.toString());
 			if(student.getStudentPriority()!= 0) {
 				contractDTO.setReduceCost((long)0);
@@ -128,8 +128,6 @@ class BookingServiceImpl implements BookingService {
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
 			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 		}
-		
-//		return null;
 	}
 
 	@Override

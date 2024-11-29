@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 public class ContractDTO {
 	private String contractId;
 	
-	private Student student;
+	private StudentDTO student;
 	
-	private Staff staff;
+	private StaffDTO staff;
 	
-	private RoomType roomType;
+	private RoomTypeDTO roomType;
 //	
 	//chi phí miễn giảm
 	private Long reduceCost;

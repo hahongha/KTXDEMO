@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.ResponseDTO;
+import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.dto.ContractDTO;
 import com.utc.dormitory_managing.service.ContractService;
 
@@ -36,7 +37,8 @@ public class ContractAPI {
 
 	@GetMapping("/{id}")
 	public ResponseDTO<ContractDTO> get(@PathVariable(value = "id") String id) {
-		return ResponseDTO.<ContractDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(ContractService.get(id))
+		ContractDTO contractDTO = ContractService.get(id);
+		return ResponseDTO.<ContractDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(contractDTO)
 				.build();
 	}
 	@GetMapping("/getAll")
