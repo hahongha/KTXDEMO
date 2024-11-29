@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,7 +44,7 @@ public class UserDetailsImpl implements UserDetails {
         user.getUsername(), 
         user.getExpired(),
         user.getPassword(), 
-        null);
+        authorities);
   }
 
   @Override

@@ -128,11 +128,10 @@ class AuthServiceImpl implements AuthService {
 	@Transactional
 	public ResponseDTO<String> signup(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO) {
 		try {
-			ModelMapper mapper = new ModelMapper();
 			if(!checkValidRoom(studentDTO, roomTypeDTO)) throw new BadRequestAlertException("Not Valid Room", "room", "valid");
 			studentService.create(studentDTO);
-			Student student = mapper.map(studentDTO, Student.class);
-			RoomType roomType = roomTypeService.getEntity(roomTypeDTO.getRoomTypeId());
+//			Student student = mapper.map(studentDTO, Student.class);
+//			RoomType roomType = roomTypeService.getEntity(roomTypeDTO.getRoomTypeId());
 			mailService.sendMailByNewAccount(studentDTO);
 			contractDTO.setStudent(studentDTO);
 			contractDTO.setRoomType(roomTypeDTO);

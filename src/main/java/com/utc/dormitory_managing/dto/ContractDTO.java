@@ -2,11 +2,6 @@ package com.utc.dormitory_managing.dto;
 
 import java.util.Date;
 
-import com.utc.dormitory_managing.entity.RoomType;
-//import com.utc.dormitory_managing.entity.Services;
-import com.utc.dormitory_managing.entity.Staff;
-import com.utc.dormitory_managing.entity.Student;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.ResponseDTO;
-import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.dto.ContractDTO;
 import com.utc.dormitory_managing.service.ContractService;
 

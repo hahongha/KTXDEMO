@@ -1,7 +1,5 @@
 package com.utc.dormitory_managing.entity;
 
-import java.util.HashSet;
-import java.util.Set;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

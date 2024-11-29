@@ -1,5 +1,7 @@
 package com.utc.dormitory_managing.service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,6 +76,7 @@ class RequirementServiceImpl implements RequirementService {
 			Requirement Requirement = mapper.map(RequirementDTO, Requirement.class);
 			Student student = studentRepo.findById(RequirementDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
 			Requirement.setStudent(student);
+			Requirement.setUpdateAt(Date.from(Instant.now()));
 			if(RequirementDTO.getStaff() !=null) {
 				Staff staff = staffRepo.findById(RequirementDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
 				Requirement.setStaff(staff);

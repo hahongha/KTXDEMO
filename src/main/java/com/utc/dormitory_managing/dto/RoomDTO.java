@@ -1,11 +1,8 @@
 package com.utc.dormitory_managing.dto;
 
-import java.util.HashSet;
-import java.util.Set;
 
 import com.utc.dormitory_managing.entity.Floor;
 import com.utc.dormitory_managing.entity.RoomType;
-import com.utc.dormitory_managing.entity.Student;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
