@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
@@ -32,6 +33,7 @@ import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.StudentRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.utils.Utils;
+
 
 public interface StudentService {
 	StudentDTO create(StudentDTO studentDTO);
@@ -58,6 +60,7 @@ class StudentServiceImpl implements StudentService {
 	private RoomRepo roomRepo;
 	
 	@Override
+	@Transactional
 	public StudentDTO create(StudentDTO studentDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
@@ -73,10 +76,7 @@ class StudentServiceImpl implements StudentService {
 			User user = mapper.map(userDTO, User.class);
 			userRepo.save(user);
 			student.setUser(user);
-			if(studentDTO.getRoomName()!= null || !studentDTO.getRoomName().isBlank()) {
-				Optional<Room> roomOP = roomRepo.findByRoomName(studentDTO.getRoomName());
-				if(roomOP.isPresent()) student.setRoom(roomOP.get());
-			}
+			student.setRoom(null);
 			studentRepo.save(student);
 			return studentDTO;
 		} catch (ResourceAccessException e) {
@@ -87,6 +87,7 @@ class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional
 	public StudentDTO update(StudentDTO studentDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
@@ -95,12 +96,12 @@ class StudentServiceImpl implements StudentService {
 			Student student = mapper.map(studentDTO, Student.class);
 			User user = studentOptional.get().getUser();
 			student.setUser(user);
-			if(studentDTO.getRoomName()== null || studentDTO.getRoomName().isBlank()) {
+			if(studentDTO.getRoomName()== null) {
 				student.setRoom(null);
 			}else {
-				
 				Optional<Room> roomOP = roomRepo.findByRoomName(studentDTO.getRoomName());
 				if(roomOP.isPresent()) student.setRoom(roomOP.get());
+				else student.setRoom(null);
 			}
 			UserResponse userResponse = mapper.map(user, UserResponse.class);
 			studentDTO.setUserResponse(userResponse);
@@ -114,6 +115,7 @@ class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional
 	public Boolean delete(String id) {
 		try {
 			Optional<Student> studentOptional = studentRepo.findById(id);
@@ -128,6 +130,7 @@ class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional
 	public StudentDTO get(String id) {
 		try {
 			StudentDTO student = new StudentDTO();
@@ -150,6 +153,7 @@ class StudentServiceImpl implements StudentService {
 
 	
 	@Override
+	@Transactional
 	public List<StudentDTO> getAll() {
 		
 		try {
@@ -171,17 +175,20 @@ class StudentServiceImpl implements StudentService {
 	}
 
 	@Override
+	@Transactional
 	public ResponseDTO<List<Student>> search(SearchDTO searchDTO) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
+	@Transactional
 	public StudentDTO updateStatus(StudentDTO studentDTO) {
 		return null;
 	}
 
 	@Override
+	@Transactional
 	public List<Student2DTO> getAll2() {
 		try {
 			List<Student2DTO> s = new ArrayList<Student2DTO>();
