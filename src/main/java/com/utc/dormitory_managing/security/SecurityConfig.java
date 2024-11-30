@@ -65,8 +65,7 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html",
-            "/auth/**",
-            "/**"
+            "/auth/**"
 	};
 	  
 	  @Bean
@@ -96,7 +95,7 @@ public class SecurityConfig {
 	 @Bean
 	  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	    http.csrf(csrf -> csrf.disable())
-	    .cors(cors -> cors.disable())
+	    .cors().and()
 	    .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
 	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 	        .authorizeHttpRequests((auth) -> 
@@ -111,32 +110,6 @@ public class SecurityConfig {
 	    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	    
 	    return http.build();
-		 
-//		 return http
-//	                .csrf()
-//	                .disable()
-//	                .authorizeHttpRequests()
-//	                .requestMatchers(AntPathRequestMatcher
-//	                                .antMatcher("/"),
-//	                        AntPathRequestMatcher
-//	                                .antMatcher("/error"),
-//	                        AntPathRequestMatcher
-//	                                .antMatcher("/favicon.ico"),
-//	                        AntPathRequestMatcher
-//	                                .antMatcher("/actuator/*"),
-//	                        AntPathRequestMatcher
-//	                                .antMatcher("/a")
-//	                )
-//	                .permitAll()
-//	                .anyRequest()
-//	                .authenticated()
-//	                .and()
-//	                .sessionManagement()
-//	                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//	                .and()
-//	                .authenticationProvider(authenticationProvider())
-//	                .addFilterBefore(new JwtAuthenticationFilter(userDetailsService()), UsernamePasswordAuthenticationFilter.class)
-//	                .build();
 	  }
 
 	@Bean
