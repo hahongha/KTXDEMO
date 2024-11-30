@@ -20,7 +20,9 @@ import com.utc.dormitory_managing.configuration.ApplicationProperties;
 import com.utc.dormitory_managing.dto.ResponseDTO;
 import com.utc.dormitory_managing.dto.SearchDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
+import com.utc.dormitory_managing.entity.Role;
 import com.utc.dormitory_managing.entity.User;
+import com.utc.dormitory_managing.repository.RoleRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 
 import jakarta.persistence.NoResultException;
@@ -53,6 +55,9 @@ class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private ApplicationProperties props;
+	
+	@Autowired
+	private RoleRepo roleRepo;
 
 
 	@Override
@@ -72,6 +77,9 @@ class UserServiceImpl implements UserService {
 			else {
 				user.setExpired(Long.parseLong(props.getExpiredTime())* user.getExpired());
 			}
+			
+			Role role = roleRepo.findByRoleName("USER").orElseThrow(NoResultException::new);
+			user.setRole(role);
 			// commit save
 			userRepo.save(user);
 			return mapper.map(user, UserDTO.class);

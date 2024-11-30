@@ -1,5 +1,8 @@
 package com.utc.dormitory_managing.dto;
 
+import java.util.List;
+
+import com.utc.dormitory_managing.entity.BillDetail;
 import com.utc.dormitory_managing.entity.Staff;
 import com.utc.dormitory_managing.entity.Student;
 
@@ -25,4 +28,6 @@ public class BillDTO {
 	private String billStatus;
 	
 	private Long billValue;
+	
+	private List<BillDetail> billDetails;
 }

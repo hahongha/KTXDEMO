@@ -10,13 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BillFormDTO {
 	private RoomDTO roomDTO;
-	
-	private int waterPreIndex;
-	
+		
 	private int waterIndex;
-	
-	private int ePreIndex;
-	
+		
 	private int eIndex;
 	
 }

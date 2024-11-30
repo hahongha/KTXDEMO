@@ -24,22 +24,22 @@ import com.utc.dormitory_managing.dto.BillFormDTO;
 import com.utc.dormitory_managing.dto.ClockDTO;
 import com.utc.dormitory_managing.dto.RoomDTO;
 import com.utc.dormitory_managing.entity.Bill;
-import com.utc.dormitory_managing.entity.Clock;
 import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.entity.Services;
+import com.utc.dormitory_managing.entity.Student;
+import com.utc.dormitory_managing.repository.BillDetailRepo;
 import com.utc.dormitory_managing.repository.BillRepo;
-import com.utc.dormitory_managing.repository.ClockRepo;
 import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.ServiceRepo;
+import com.utc.dormitory_managing.repository.StudentRepo;
 import com.utc.dormitory_managing.utils.Utils;
 import com.utc.dormitory_managing.utils.Utils.DateRange;
+
+import jakarta.persistence.NoResultException;
 
 public interface BillService {
 	BillDTO create(BillDTO billDTO);
 	BillDTO update(BillDTO billDTO);
-	
-	BillDTO updateStatus(BillDTO billDTO, String preStatus, String newStatus);
-	void updateStatus2(BillDTO billDTO, String preStatus, String newStatus);
 	Boolean delete(String id);
 	BillDTO get(String id);
 	List<BillDTO> getAll();
@@ -56,13 +56,13 @@ class BillServiceImpl implements BillService {
 	private RoomRepo roomRepo;
 	
 	@Autowired
-	private ClockRepo clockRepo;
-	
-	@Autowired
 	private ServiceRepo serviceRepo;
 	
 	@Autowired
-	private ClockService clockService;
+	private StudentRepo studentRepo;
+	
+	@Autowired
+	private BillDetailRepo billDetailRepo;
 	
 	@Override
 	public BillDTO create(BillDTO BillDTO) {
@@ -85,9 +85,21 @@ class BillServiceImpl implements BillService {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Bill> BillOptional = billRepo.findById(BillDTO.getBillId());
 			if(BillOptional.isEmpty()) throw new BadRequestAlertException("Not Found Bill", "Bill", "missing");
-			Bill Bill = mapper.map(BillDTO, Bill.class);
-			billRepo.save(Bill);
-			return BillDTO;
+			Bill bill = BillOptional.get();
+			Student studentpay = new Student();
+//			System.err.println(bill.toString());
+			if(BillDTO.getStudentPay()!=null) {
+				studentpay = studentRepo.findById(BillDTO.getStudentPay().getStudentId()).orElseThrow(NoResultException::new);
+				if(studentpay.getRoom()!= bill.getRoom()) throw new BadRequestAlertException("Not Match Room", "bill", "match");
+				bill.setStudentPay(studentpay);
+				bill.setBillStatus(StatusBilltRef.COMPLETE.toString());
+				bill.setDayPay(new Date());
+			}
+			billRepo.save(bill);
+			BillDTO billDTO2 = mapper.map(bill, BillDTO.class);
+			System.err.println(bill.toString());
+			System.err.println(billDTO2.toString());
+			return billDTO2;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -147,56 +159,21 @@ class BillServiceImpl implements BillService {
 		Services serviceW = serviceRepo.findByServiceName("WATER").get();
 		//lay ki han tinh toan cua hoa don cua hoa don
 		Optional<Room> roomOp = roomRepo.findById(billFormDTO.getRoomDTO().getRoomId());
+		if(roomOp.isEmpty()) throw new BadRequestAlertException("Not Found Room", "room", "missingId"); 
+		Room room = roomOp.get();
+		int preE = room.getLastElectronic();
+		int lE = billFormDTO.getEIndex();
+		room.setPreElectronic(preE);
+		room.setLastElectronic(lE);
 		
-		if(roomOp.isEmpty()) throw new BadRequestAlertException("Not Found Room", "room", "missingId");
-		RoomDTO room2 = mapper.map(roomOp.get(), RoomDTO.class);
+		int preW = room.getLastWater();
+		int lW = billFormDTO.getWaterIndex();
+		room.setLastWater(lW);
+		room.setPreWater(preW);
 		
-		//tinh toan tien dien va tien nuoc cua hoa don
-		ClockDTO water = new ClockDTO();
-		water.setClockName(NameClockRef.WATER.toString());
-		DateRange dateRange = Utils.getCurrentMonth();
-		water.setStartDate(dateRange.getStartDate());
-		water.setEndDate(dateRange.getEndDate());
-		water.setPreviosIndex(billFormDTO.getWaterPreIndex());
-		water.setLastIndex(billFormDTO.getWaterIndex());
-		Long value =(long) (water.getLastIndex()- water.getPreviosIndex())* serviceW.getServicePrice();
-		water.setRoom(room2);
-		clockService.create(water);
+		roomRepo.save(room);
 		
-		
-		
-		ClockDTO electronic = new ClockDTO();
-		electronic.setClockName(NameClockRef.ELECTRONIC.toString());
-		electronic.setStartDate(dateRange.getStartDate());
-		electronic.setEndDate(dateRange.getEndDate());
-		electronic.setPreviosIndex(billFormDTO.getEPreIndex());
-		electronic.setLastIndex(billFormDTO.getEIndex());
-		electronic.setRoom(room2);
-		Long value2 =(long) (electronic.getLastIndex()- water.getPreviosIndex())* serviceE.getServicePrice();
-		
-		clockService.create(electronic);
-		
-		bill.setBillId(UUID.randomUUID().toString());
-		bill.setBillName(roomOp.get().getRoomName()+" thang "+Utils.getMonth(dateRange.getEndDate()));
-		System.err.println(bill.getBillName());
-		bill.setRoom(roomOp.get());
-		bill.setBillValue(value+ value2);
-		bill.setBillStatus(StatusBilltRef.WAITING.toString());
-		bill.setBillDescription("electronic:"+ electronic.toString()+","+ "water:"+water.toString());
-		billRepo.save(bill);
-		return mapper.map(bill, BillDTO.class);
-	}
-
-	@Override
-	public BillDTO updateStatus(BillDTO billDTO, String preStatus, String newStatus) {
-		// TODO Auto-generated method stub
 		return null;
-	}
-
-	@Override
-	public void updateStatus2(BillDTO billDTO, String preStatus, String newStatus) {
-		// TODO Auto-generated method stub
-		
 	}
 	
 }

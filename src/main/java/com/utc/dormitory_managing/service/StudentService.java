@@ -26,13 +26,17 @@ import com.utc.dormitory_managing.dto.Student2DTO;
 import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
 import com.utc.dormitory_managing.dto.UserResponse;
+import com.utc.dormitory_managing.entity.Role;
 import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.entity.User;
+import com.utc.dormitory_managing.repository.RoleRepo;
 import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.StudentRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.utils.Utils;
+
+import jakarta.persistence.NoResultException;
 
 
 public interface StudentService {
@@ -62,6 +66,9 @@ class StudentServiceImpl implements StudentService {
 	@Autowired
 	private MailService mailService;
 	
+	@Autowired
+	private RoleRepo roleRepo;
+	
 	@Override
 	@Transactional
 	public StudentDTO create(StudentDTO studentDTO) {
@@ -77,7 +84,9 @@ class StudentServiceImpl implements StudentService {
 			String encodedPassword = encoder.encode(Utils.convertDateToString(studentDTO.getDateOfBirth()));
 			userDTO.setPassword(encodedPassword);
 			userDTO.setExpired(Long.parseLong(props.getExpiredTime())*12);
+			Role role = roleRepo.findByRoleName("USER").orElseThrow(NoResultException::new);
 			User user = mapper.map(userDTO, User.class);
+			user.setRole(role);
 			userRepo.save(user);
 			student.setUser(user);
 			student.setRoom(null);

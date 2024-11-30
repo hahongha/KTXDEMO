@@ -58,9 +58,9 @@ public class AuthAPI {
 	}
 
 	@PostMapping("/signup")
-	public ResponseDTO<String> signup(@Valid @RequestBody StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO) {
+	public ResponseDTO<String> signup(@Valid @RequestBody ContractDTO contractDTO) {
 		try {
-			return authService.signup(studentDTO, roomTypeDTO, contractDTO);
+			return authService.signup(contractDTO);
 		} catch (Exception e) {
 			throw Problem.builder().withStatus(Status.INTERNAL_SERVER_ERROR).withDetail("SERVER ERROR").build();
 		}

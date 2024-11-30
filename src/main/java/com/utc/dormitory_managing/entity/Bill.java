@@ -3,13 +3,18 @@ package com.utc.dormitory_managing.entity;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import com.utc.dormitory_managing.dto.BillDetailDTO;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "bill")
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false, exclude = {"room","studentPay", "staff"})
+@EqualsAndHashCode(callSuper = false, exclude = {"room","studentPay", "staff","billDetails"})
 public class Bill extends BaseModel {
 	private static final long serialVersionUID = 1L;
 	
@@ -55,5 +60,8 @@ public class Bill extends BaseModel {
 	
 	@Column
 	private Date dayPay;
+	
+	@OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BillDetail> billDetails;
 	
 }

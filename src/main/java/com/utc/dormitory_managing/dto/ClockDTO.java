@@ -1,9 +1,5 @@
 package com.utc.dormitory_managing.dto;
 
-import java.util.Date;
-
-import com.utc.dormitory_managing.entity.Room;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,21 +8,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClockDTO {
-	private String clockId;
-	
-	private String clockName;
-	
-	private String clockDes;
-	
-	private RoomDTO room;
-	
+	private String id;
+	private String name;
 	private int previosIndex;
-	
 	private int lastIndex;
-	
-	private Date startDate;
-	
-	private Date endDate;
-	
+	private int month;
+	private int year;
 	private Long value;
 }

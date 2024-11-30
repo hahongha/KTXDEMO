@@ -76,6 +76,7 @@ class ContractServiceImpl implements ContractService {
 			contract.setRoomType(roomType);
 			contract.setContractId(UUID.randomUUID().toString());
 			contract.setContractStatus(StatusContractRef.WAITING.toString());
+			contract.setContractRent(roomType.getRoomTypePrice()- contract.getReduceCost());
 			ContractRepo.save(contract);
 			contractDTO = mapper.map(contract, ContractDTO.class);
 			return contractDTO;

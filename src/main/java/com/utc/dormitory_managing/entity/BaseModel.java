@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -20,6 +21,7 @@ public abstract class BaseModel implements Serializable {
 	private Date createAt;
 
 	@Column(name = "update_at")
+	@UpdateTimestamp
 	private Date updateAt;
 
 	@Column(name = "create_by")

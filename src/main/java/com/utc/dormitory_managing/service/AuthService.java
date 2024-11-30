@@ -34,7 +34,7 @@ public interface AuthService {
 
 	ResponseDTO<String> handleRefreshToken(String refreshToken_in);
 
-	ResponseDTO<String> signup(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO);
+	ResponseDTO<String> signup(ContractDTO contractDTO);
 
 	Boolean checkValidRoom(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO);
 
@@ -120,13 +120,11 @@ class AuthServiceImpl implements AuthService {
 
 	@Override
 	@Transactional
-	public ResponseDTO<String> signup(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO) {
+	public ResponseDTO<String> signup(ContractDTO contractDTO) {
 		try {
-			if (!checkValidRoom(studentDTO, roomTypeDTO))
+			if (!checkValidRoom(contractDTO.getStudent(), contractDTO.getRoomType()))
 				throw new BadRequestAlertException("Not Valid Room", "room", "valid");
-			studentService.create(studentDTO);
-			contractDTO.setStudent(studentDTO);
-			contractDTO.setRoomType(roomTypeDTO);
+			studentService.create(contractDTO.getStudent());
 			contractService.create(contractDTO);
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).build();
 		} catch (ResourceAccessException e) {
