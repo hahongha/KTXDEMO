@@ -18,7 +18,7 @@ public class ClockDTO {
 	
 	private String clockDes;
 	
-	private Room room;
+	private RoomDTO room;
 	
 	private int previosIndex;
 	

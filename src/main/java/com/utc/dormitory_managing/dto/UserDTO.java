@@ -16,6 +16,6 @@ public class UserDTO {
 	private Long expired;
 	private String refreshToken;
 	private String accessToken;
-	private Role role;
+	private RoleDTO role;
 	
 }

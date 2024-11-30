@@ -58,7 +58,22 @@ public static final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 		}
 		return jwt;
 	}
-
+	
+	public String generateAccessToken2(String uid) {
+		Date now = new Date();
+		Date expiryDate = new Date(now.getTime() + jwtExpirationAT);
+		Key key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+		String jwt = "";
+		try {
+			jwt =Jwts.builder().setSubject(uid).setIssuedAt(new Date())
+					.setExpiration(new Date((new Date()).getTime() + jwtExpirationAT))
+					.signWith(secretKey, SignatureAlgorithm.HS256).compact();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jwt;
+	}
+	
 	public String generateRefreshToken(String uid) {
 
 		Date now = new Date();
@@ -70,7 +85,6 @@ public static final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
 	private Key key() {
 		return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-//		return Keys.secretKeyFor(SignatureAlgorithm.HS256)
 	}
 	
 	public String getUserIdFromJWT(String token) {
@@ -79,12 +93,10 @@ public static final Key secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 	            .build()
 	            .parseClaimsJws(token) // Phân tích JWT
 	            .getBody();
-		System.err.println("check44");
 		return String.valueOf(claims.getSubject());
 	}
 	public boolean validateToken(String authToken) {
 		try {
-			System.err.println("check2");
 			String jwt =Jwts.parserBuilder()
             .setSigningKey(secretKey)
             .build()

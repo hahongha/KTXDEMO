@@ -1,5 +1,10 @@
 package com.utc.dormitory_managing.entity;
 
+
+import java.util.Date;
+import java.util.Set;
+
+import jakarta.mail.Service;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -47,4 +52,7 @@ public class Bill extends BaseModel {
 	
 	@Column
 	private Long billValue;
+	
+	@Column
+	private Date dayPay;
 }

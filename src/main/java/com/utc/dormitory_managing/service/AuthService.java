@@ -33,7 +33,7 @@ public interface AuthService {
 	ResponseDTO<String> signin(LoginRequest loginRequest, User user);
 
 	ResponseDTO<String> handleRefreshToken(String refreshToken_in);
-	
+
 	ResponseDTO<String> signup(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO);
 
 	Boolean checkValidRoom(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO);
@@ -54,19 +54,19 @@ class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	JwtTokenProvider tokenProvider;
-	
+
 	@Autowired
 	StudentService studentService;
-	
+
 	@Autowired
 	MailService mailService;
-	
+
 	@Autowired
 	RoomService roomService;
-	
+
 	@Autowired
 	ContractService contractService;
-	
+
 	@Autowired
 	RoomTypeService roomTypeService;
 
@@ -74,7 +74,6 @@ class AuthServiceImpl implements AuthService {
 	public ResponseDTO<String> signin(LoginRequest loginRequest, User user) {
 		try {
 			System.err.println(loginRequest.toString());
-//			System.err.println(user.toString());
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 			// Set thông tin authentication vào Security Context
@@ -99,20 +98,15 @@ class AuthServiceImpl implements AuthService {
 	@Override
 	public ResponseDTO<String> handleRefreshToken(String refreshToken_in) {
 		try {
-
 			String user_id = tokenProvider.getUserIdFromJWT(refreshToken_in);
-			System.out.println("user_id: " + user_id);
 
 			User user = userRepo.findByUserId(user_id).get();
-
-			Authentication authentication = authenticationManager
-					.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
-
-			String accessToken = tokenProvider.generateAccessToken(authentication);
+			String accessToken = tokenProvider.generateAccessToken2(user.getUserId());
 			String refreshToken = tokenProvider.generateRefreshToken(user.getUserId());
-
 			user.setAccessToken(accessToken);
 			user.setRefreshToken(refreshToken);
+
+			userRepo.save(user);
 
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).accessToken(accessToken)
 					.refreshToken(refreshToken).build();
@@ -128,7 +122,8 @@ class AuthServiceImpl implements AuthService {
 	@Transactional
 	public ResponseDTO<String> signup(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO, ContractDTO contractDTO) {
 		try {
-			if(!checkValidRoom(studentDTO, roomTypeDTO)) throw new BadRequestAlertException("Not Valid Room", "room", "valid");
+			if (!checkValidRoom(studentDTO, roomTypeDTO))
+				throw new BadRequestAlertException("Not Valid Room", "room", "valid");
 			studentService.create(studentDTO);
 			contractDTO.setStudent(studentDTO);
 			contractDTO.setRoomType(roomTypeDTO);
@@ -145,10 +140,12 @@ class AuthServiceImpl implements AuthService {
 	public Boolean checkValidRoom(StudentDTO studentDTO, RoomTypeDTO roomTypeDTO) {
 		try {
 			RoomType roomType = roomTypeService.getEntity(roomTypeDTO.getRoomTypeId());
-			//check loai phong trong
-			Long contractNumber= contractService.checkContractNumber(roomType,studentDTO.getStudentGender(), StatusContractRef.SUSPEND.toString());
+			// check loai phong trong
+			Long contractNumber = contractService.checkContractNumber(roomType, studentDTO.getStudentGender(),
+					StatusContractRef.SUSPEND.toString());
 			Long roomNumber = roomService.checkRoomNumber(roomType, studentDTO.getStudentGender());
-			if(contractNumber < roomNumber) return true;
+			if (contractNumber < roomNumber)
+				return true;
 			return false;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -157,6 +154,4 @@ class AuthServiceImpl implements AuthService {
 		}
 	}
 
-
 }
-

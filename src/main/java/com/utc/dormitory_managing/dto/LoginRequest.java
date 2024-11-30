@@ -1,8 +1,10 @@
 package com.utc.dormitory_managing.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.ToString;
 
 @ToString
+@AllArgsConstructor
 public class LoginRequest {
 	private String username;
 

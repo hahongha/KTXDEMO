@@ -14,5 +14,5 @@ public class FloorDTO {
 	
 	private String floorName;
 	
-	private Building building;
+	private BuildingDTO building;
 }

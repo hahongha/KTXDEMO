@@ -17,7 +17,11 @@ import org.zalando.problem.Status;
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.ClockDTO;
 import com.utc.dormitory_managing.entity.Clock;
+import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.repository.ClockRepo;
+import com.utc.dormitory_managing.repository.RoomRepo;
+
+import jakarta.persistence.NoResultException;
 
 public interface ClockService {
 	ClockDTO create(ClockDTO ClockDTO);
@@ -32,11 +36,16 @@ class ClockServiceImpl implements ClockService {
 	@Autowired
 	private ClockRepo ClockRepo;
 	
+	@Autowired
+	private RoomRepo roomRepo;
+	
 	@Override
 	public ClockDTO create(ClockDTO ClockDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Clock Clock = mapper.map(ClockDTO, Clock.class);
+			Room room = roomRepo.findById(ClockDTO.getRoom().getRoomId()).orElseThrow(NoResultException::new);
+			Clock.setRoom(room);
 			Clock.setClockId(UUID.randomUUID().toString());
 			Long value =(long) (Clock.getLastIndex()- Clock.getPreviosIndex())* 4000;
 			Clock.setValue(value);
@@ -56,6 +65,8 @@ class ClockServiceImpl implements ClockService {
 			Optional<Clock> ClockOptional = ClockRepo.findById(ClockDTO.getClockId());
 			if(ClockOptional.isEmpty()) throw new BadRequestAlertException("Not Found Clock", "Clock", "missing");
 			Clock Clock = mapper.map(ClockDTO, Clock.class);
+			Room room = roomRepo.findById(ClockDTO.getRoom().getRoomId()).orElseThrow(NoResultException::new);
+			Clock.setRoom(room);
 			Long value =(long) (Clock.getLastIndex()- Clock.getPreviosIndex())* 4000;
 			Clock.setValue(value);
 			ClockRepo.save(Clock);

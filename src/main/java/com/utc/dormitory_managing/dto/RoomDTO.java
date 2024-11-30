@@ -18,9 +18,9 @@ public class RoomDTO {
 	
 	private String roomDes;
 	
-	private RoomType roomType;
+	private RoomTypeDTO roomType;
 	
-	private Floor floor;
+	private FloorDTO floor;
 	
 	private int maxNumber;
 	

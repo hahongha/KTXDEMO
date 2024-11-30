@@ -18,9 +18,9 @@ public class BillDTO {
 	
 	private String billDescription;
 	
-	private Student studentPay;
+	private StudentDTO studentPay;
 	
-	private Staff staff;
+	private StaffDTO staff;
 	
 	private String billStatus;
 	

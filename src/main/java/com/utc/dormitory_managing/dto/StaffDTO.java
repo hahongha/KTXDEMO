@@ -24,7 +24,6 @@ public class StaffDTO {
 	
 	private Boolean staffGender;
 	
-	
 	private String staffIdentification;
 	
 	private String phoneNumber;

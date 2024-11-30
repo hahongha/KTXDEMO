@@ -147,7 +147,10 @@ class BillServiceImpl implements BillService {
 		Services serviceW = serviceRepo.findByServiceName("WATER").get();
 		//lay ki han tinh toan cua hoa don cua hoa don
 		Optional<Room> roomOp = roomRepo.findById(billFormDTO.getRoomDTO().getRoomId());
+		
 		if(roomOp.isEmpty()) throw new BadRequestAlertException("Not Found Room", "room", "missingId");
+		RoomDTO room2 = mapper.map(roomOp.get(), RoomDTO.class);
+		
 		//tinh toan tien dien va tien nuoc cua hoa don
 		ClockDTO water = new ClockDTO();
 		water.setClockName(NameClockRef.WATER.toString());
@@ -157,7 +160,7 @@ class BillServiceImpl implements BillService {
 		water.setPreviosIndex(billFormDTO.getWaterPreIndex());
 		water.setLastIndex(billFormDTO.getWaterIndex());
 		Long value =(long) (water.getLastIndex()- water.getPreviosIndex())* serviceW.getServicePrice();
-		water.setRoom(roomOp.get());
+		water.setRoom(room2);
 		clockService.create(water);
 		
 		
@@ -168,7 +171,7 @@ class BillServiceImpl implements BillService {
 		electronic.setEndDate(dateRange.getEndDate());
 		electronic.setPreviosIndex(billFormDTO.getEPreIndex());
 		electronic.setLastIndex(billFormDTO.getEIndex());
-		electronic.setRoom(roomOp.get());
+		electronic.setRoom(room2);
 		Long value2 =(long) (electronic.getLastIndex()- water.getPreviosIndex())* serviceE.getServicePrice();
 		
 		clockService.create(electronic);
@@ -179,7 +182,7 @@ class BillServiceImpl implements BillService {
 		bill.setRoom(roomOp.get());
 		bill.setBillValue(value+ value2);
 		bill.setBillStatus(StatusBilltRef.WAITING.toString());
-		
+		bill.setBillDescription("electronic:"+ electronic.toString()+","+ "water:"+water.toString());
 		billRepo.save(bill);
 		return mapper.map(bill, BillDTO.class);
 	}
