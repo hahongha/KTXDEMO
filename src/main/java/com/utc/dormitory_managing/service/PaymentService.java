@@ -34,16 +34,15 @@ public class PaymentService  {
 
     private final VNPAYConfig vnPayConfig;
 
-    public PaymentDTO.VNPayResponse createVnPayPayment(HttpServletRequest request ){
-        long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
-        String studentId = request.getParameter("studentId");
-        String bankCode = request.getParameter("bankCode");
+   public PaymentDTO.VNPayResponse createVnPayPayment(HttpServletRequest request, String amount, String studentId ) {
+        long amount1 = Long.parseLong(amount)*100L;
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
-        vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
+        vnpParamsMap.put("vnp_Amount", String.valueOf(amount1));
         vnpParamsMap.put("vnp_OrderInfo", "MSV_"+studentId);
-        if (bankCode != null && !bankCode.isEmpty()) {
-            vnpParamsMap.put("vnp_BankCode", bankCode);
-        }
+//        if (bankCode != null && !bankCode.isEmpty()) {
+//            vnpParamsMap.put("vnp_BankCode", bankCode);
+//        }
+        vnpParamsMap.put("vnp_BankCode", "NCB");
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
 
         //build query url
