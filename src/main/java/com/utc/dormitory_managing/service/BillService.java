@@ -241,6 +241,10 @@ class BillServiceImpl implements BillService {
 		
 		billDetailRepo.save(bd2);
 		billDetailRepo.save(bd1);
+		
+		bill.setBillValue(bd1.getValue()+ bd2.getValue());
+		billRepo.save(bill);
+		
 		return get(bill.getBillId());
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
