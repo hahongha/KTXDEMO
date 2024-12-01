@@ -45,8 +45,6 @@ import jakarta.persistence.NoResultException;
 public interface BillService {
 	BillDTO create(BillDTO billDTO);
 	BillDTO update(BillDTO billDTO);
-	
-	BillDTO2 update2(BillDTO2 billDTO);
 	Boolean delete(String id);
 	BillDTO get(String id);
 	List<BillDTO> getAll();
@@ -132,7 +130,14 @@ class BillServiceImpl implements BillService {
 		try {
 			Optional<Bill> BillOptional = billRepo.findById(id);
 			if(BillOptional.isEmpty()) return false;
-			billRepo.deleteById(id);
+			Bill bill = BillOptional.get();
+			List<BillDetail> billDetails = billDetailRepo.findByBill(id);
+			billDetailRepo.deleteAll(billDetails);
+			Room room = bill.getRoom();
+			room.setLastElectronic(room.getPreElectronic());
+			room.setLastWater(room.getPreWater());
+			roomRepo.save(room);
+			billRepo.delete(bill);
 			return true;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -236,7 +241,7 @@ class BillServiceImpl implements BillService {
 		
 		billDetailRepo.save(bd2);
 		billDetailRepo.save(bd1);
-		return new ModelMapper().map(bill, BillDTO.class);
+		return get(bill.getBillId());
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -262,12 +267,6 @@ class BillServiceImpl implements BillService {
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
 			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 		}
-	}
-
-	@Override
-	public BillDTO2 update2(BillDTO2 billDTO) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 }

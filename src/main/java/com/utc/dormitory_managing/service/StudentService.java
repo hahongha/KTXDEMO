@@ -48,6 +48,7 @@ public interface StudentService {
 	List<Student2DTO> getAll2();
 	StudentDTO updateStatus(StudentDTO studentDTO);
 	ResponseDTO<List<Student>> search(SearchDTO searchDTO);
+	List<StudentDTO> findbyRoom(RoomDTO room);
 }
 @Service
 class StudentServiceImpl implements StudentService {
@@ -232,6 +233,21 @@ class StudentServiceImpl implements StudentService {
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
 			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 		}
+	}
+
+	@Override
+	public List<StudentDTO> findbyRoom(RoomDTO room) {
+		try {
+			List<Student> students = studentRepo.findByRoom(room.getRoomId());
+			if (students.size()==0) {
+				return new ArrayList<StudentDTO>();
+			}
+			return students.stream().map(s -> new ModelMapper().map(s, StudentDTO.class)).collect(Collectors.toList());
+	} catch (ResourceAccessException e) {
+		throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
+	} catch (HttpServerErrorException | HttpClientErrorException e) {
+		throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
+	}
 	}
 
 }

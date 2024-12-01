@@ -97,7 +97,7 @@ public class Utils {
 	public static String getMonth(Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		int monthValue = calendar.get(Calendar.MONTH); // Thêm 1 để chuyển sang từ 1-12
+		int monthValue = calendar.get(Calendar.MONTH)+1; // Thêm 1 để chuyển sang từ 1-12
         return String.valueOf(monthValue);
 	}
 	

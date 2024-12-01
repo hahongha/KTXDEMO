@@ -1,5 +1,6 @@
 package com.utc.dormitory_managing.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,8 @@ public interface StudentRepo extends JpaRepository<Student, String> {
 	
 	@Query("SELECT Count(a.studentId) from Student a where a.room.roomId = :x and a.studentStatus = 0")
 	Long getStudentNumber(@Param("x") String roomId);
+	
+	@Query("SELECT a from Student a where a.room.roomId = :x and a.studentStatus = 0")
+	List<Student> findByRoom(@Param("x") String roomId);
+	
 }
