@@ -81,7 +81,7 @@ class StudentServiceImpl implements StudentService {
 			userDTO.setUserId(UUID.randomUUID().toString().replaceAll("-", ""));
 			userDTO.setUsername(studentDTO.getStudentId());
 			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-			String encodedPassword = encoder.encode(Utils.convertDateToString(studentDTO.getDateOfBirth()));
+			String encodedPassword = encoder.encode(student.getStudentId());
 			userDTO.setPassword(encodedPassword);
 			userDTO.setExpired(Long.parseLong(props.getExpiredTime())*12);
 			Role role = roleRepo.findByRoleName("USER").orElseThrow(NoResultException::new);
@@ -113,7 +113,12 @@ class StudentServiceImpl implements StudentService {
 				student.setRoom(null);
 			}else {
 				Optional<Room> roomOP = roomRepo.findByRoomName(studentDTO.getRoomName());
-				if(roomOP.isPresent()) student.setRoom(roomOP.get());
+				if(roomOP.isPresent()) {
+					student.setRoom(roomOP.get());
+					Long count = studentRepo.getStudentNumber(roomOP.get().getRoomId());
+					roomOP.get().setRoomNumber(Integer.valueOf(count.toString()));
+					roomRepo.save(roomOP.get());
+				}
 				else student.setRoom(null);
 			}
 			UserResponse userResponse = mapper.map(user, UserResponse.class);
@@ -173,8 +178,6 @@ class StudentServiceImpl implements StudentService {
 			ModelMapper mapper = new ModelMapper();
 			List<Student> students = studentRepo.findAll();
 			List<StudentDTO> studentDTOs = new ArrayList<StudentDTO>();
-//			= students.stream().map(s -> mapper.map(s, StudentDTO.class))
-//					.collect(Collectors.toList());
 			for (Student student : students) {
 				StudentDTO studentDTO = get(student.getStudentId());
 				studentDTOs.add(studentDTO);

@@ -19,10 +19,12 @@ import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.configuration.ApplicationProperties.StatusContractRef;
 import com.utc.dormitory_managing.dto.ContractDTO;
 import com.utc.dormitory_managing.entity.Contract;
+import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.entity.RoomType;
 import com.utc.dormitory_managing.entity.Staff;
 import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.repository.ContractRepo;
+import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.RoomTypeRepo;
 import com.utc.dormitory_managing.repository.StaffRepo;
 import com.utc.dormitory_managing.repository.StudentRepo;
@@ -61,12 +63,16 @@ class ContractServiceImpl implements ContractService {
 	@Autowired
 	private StaffRepo staffRepo;
 	
+	@Autowired
+	private RoomRepo roomRepo;
+	
 	@Override
 	public ContractDTO create(ContractDTO contractDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Contract contract = mapper.map(contractDTO, Contract.class);
 			Student student = studentRepo.findById(contractDTO.getStudent().getStudentId()).orElseThrow(NoResultException::new);
+			
 			contract.setStudent(student);
 			if(contractDTO.getStaff()!=null) {
 				Staff staff = staffRepo.findById(contractDTO.getStaff().getStaffId()).orElseThrow(NoResultException::new);
@@ -74,8 +80,16 @@ class ContractServiceImpl implements ContractService {
 			}else contract.setStaff(null);
 			RoomType roomType = roomTypeRepo.findById(contractDTO.getRoomType().getRoomTypeId()).orElseThrow(NoResultException::new);
 			contract.setRoomType(roomType);
+			Room room = roomRepo.findByRoomValid(roomType.getRoomTypeId()).orElseThrow(NoResultException::new);
+			room.setRoomNumber(student.getRoom().getRoomNumber()+1);
+			if(room.getRoomNumber()>= roomType.getRoomTypeNumber()) {
+				room.setRoomValid(false);
+			}
+			System.err.println(room.getRoomId());
+//			student.setRoom(room);
+//			studentRepo.save(student);
 			contract.setContractId(UUID.randomUUID().toString());
-			contract.setContractStatus(StatusContractRef.WAITING.toString());
+			contract.setContractStatus(StatusContractRef.ACTIVE.toString());
 			contract.setContractRent(roomType.getRoomTypePrice()- contract.getReduceCost());
 			ContractRepo.save(contract);
 			contractDTO = mapper.map(contract, ContractDTO.class);

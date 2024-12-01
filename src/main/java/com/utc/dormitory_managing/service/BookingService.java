@@ -153,6 +153,8 @@ class BookingServiceImpl implements BookingService {
 					i++;
 				}
 				room.setRoomValid(false);
+				Long count = studentRepo.getStudentNumber(room.getRoomId());
+				room.setRoomNumber(Integer.valueOf(count.toString()));
 				roomRepo.save(room);
 			}
 		} catch (ResourceAccessException e) {

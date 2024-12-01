@@ -123,7 +123,7 @@ class AuthServiceImpl implements AuthService {
 	public ResponseDTO<String> signup(ContractDTO contractDTO) {
 		try {
 			if (!checkValidRoom(contractDTO.getStudent(), contractDTO.getRoomType()))
-				throw new BadRequestAlertException("Not Valid Room", "room", "valid");
+				throw new BadRequestAlertException("Not Valid Room", "room", "valid");		
 			studentService.create(contractDTO.getStudent());
 			contractService.create(contractDTO);
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).build();

@@ -47,6 +47,7 @@ public class Utils {
 		Date now = new Date();
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		String dateString = formatter.format(now);
+		System.err.println(dateString);
 		return dateString;
 	}
 

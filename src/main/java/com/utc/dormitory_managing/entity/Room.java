@@ -71,5 +71,4 @@ public class Room extends BaseModel{
 	@Column
 	private int lastElectronic=0;
 	
-	
 }

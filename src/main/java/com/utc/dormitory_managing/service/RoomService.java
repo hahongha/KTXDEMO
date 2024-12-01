@@ -101,10 +101,7 @@ class RoomServiceImpl implements RoomService {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Room> RoomOptional = RoomRepo.findById(id);
-			if(RoomOptional.isEmpty()) throw new BadRequestAlertException("Not Found Room", "Room", "missing");
-			
-//			System.err.println(RoomOptional.get().getStudents().size());
-			
+			if(RoomOptional.isEmpty()) throw new BadRequestAlertException("Not Found Room", "Room", "missing");			
 			return mapper.map(RoomOptional.get(), RoomDTO.class);
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();

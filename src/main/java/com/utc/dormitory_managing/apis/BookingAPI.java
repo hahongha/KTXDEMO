@@ -39,7 +39,6 @@ public class BookingAPI {
 	public ResponseDTO<Void> Soft() throws URISyntaxException {
 		List<RoomTypeDTO> roomTypes = roomTypeService.getAll();
 		for (RoomTypeDTO roomTypeDTO2 : roomTypes) {
-//			System.err.println(roomTypeDTO2.getRoomTypeName());
 			bookingService.RoomSoft(roomTypeDTO2);
 		}
 		return ResponseDTO.<Void>builder().code(String.valueOf(HttpStatus.OK.value())).build();

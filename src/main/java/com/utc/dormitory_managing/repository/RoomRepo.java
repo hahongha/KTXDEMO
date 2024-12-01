@@ -20,6 +20,9 @@ public interface RoomRepo extends JpaRepository<Room, String>  {
 	@Query("SELECT a from Room a where a.roomName = :x ")
 	Optional<Room> findByRoomName(@Param("x") String roomName);
 	
+	@Query("SELECT a from Room a where a.roomValid = true and a.roomType.roomTypeId = :x ORDER BY a.roomId limit 1")
+	Optional<Room> findByRoomValid(@Param("x") String roomTypeId);
+	
 	@Query("SELECT a from Room a where a.roomType.roomTypeId = :x and a.roomGender= :y and a.roomValid = :z ")
 	List<Room> findByRoomTypeGender(@Param("x") String roomTypeId, @Param("y") Boolean gender, @Param("z") Boolean roomValid );
 
