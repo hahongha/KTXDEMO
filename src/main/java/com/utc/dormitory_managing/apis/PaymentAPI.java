@@ -24,10 +24,16 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
-//http://localhost:8080/api/payment/vn-pay?amount=100000&bankCode=NCB&studentId=12111111
-    @GetMapping("/vn-pay")
-    public ResponseObject<PaymentDTO.VNPayResponse> pay(HttpServletRequest request ) {
-        return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request));
+//http://localhost:8080/api/payment/vn-pay?amount=100000&studentId=12111111
+   @GetMapping("/vn-pay")
+    public ResponseObject<PaymentDTO.VNPayResponse> pay
+    (
+            HttpServletRequest request,
+            @RequestParam(value = "amount" ) String amount,
+            @RequestParam(value = "studentId" ) String studentId
+    )
+    {
+        return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request, amount, studentId));
     }
 
     @GetMapping("/vn-pay-callback")
