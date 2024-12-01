@@ -4,6 +4,7 @@ package com.utc.dormitory_managing.dto;
 import com.utc.dormitory_managing.entity.Floor;
 import com.utc.dormitory_managing.entity.RoomType;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,4 +32,13 @@ public class RoomDTO {
 	private Boolean roomGender;
 	
 	private Boolean roomValid;
+	
+	private int preWater=0;
+	
+	private int lastWater=0;
+	
+	private int preElectronic=0;
+	
+	private int lastElectronic=0;
+	
 }

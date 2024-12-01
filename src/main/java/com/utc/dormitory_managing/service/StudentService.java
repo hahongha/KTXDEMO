@@ -49,6 +49,7 @@ public interface StudentService {
 	StudentDTO updateStatus(StudentDTO studentDTO);
 	ResponseDTO<List<Student>> search(SearchDTO searchDTO);
 	List<StudentDTO> findbyRoom(RoomDTO room);
+	StudentDTO findbyUser(String userId);
 }
 @Service
 class StudentServiceImpl implements StudentService {
@@ -243,6 +244,19 @@ class StudentServiceImpl implements StudentService {
 				return new ArrayList<StudentDTO>();
 			}
 			return students.stream().map(s -> new ModelMapper().map(s, StudentDTO.class)).collect(Collectors.toList());
+	} catch (ResourceAccessException e) {
+		throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
+	} catch (HttpServerErrorException | HttpClientErrorException e) {
+		throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
+	}
+	}
+
+	@Override
+	public StudentDTO findbyUser(String userId) {
+		try {
+			Optional<Student> student = studentRepo.findByUser(userId);
+			if(student.isEmpty()) return null;
+			return new ModelMapper().map(student, StudentDTO.class);
 	} catch (ResourceAccessException e) {
 		throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 	} catch (HttpServerErrorException | HttpClientErrorException e) {

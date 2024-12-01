@@ -18,4 +18,8 @@ public interface StudentRepo extends JpaRepository<Student, String> {
 	@Query("SELECT a from Student a where a.room.roomId = :x and a.studentStatus = 0")
 	List<Student> findByRoom(@Param("x") String roomId);
 	
+	@Query("SELECT a from Student a where a.user.userId = :x")
+	Optional<Student> findByUser(@Param("x") String userId);
+	
+	
 }

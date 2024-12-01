@@ -1,5 +1,7 @@
 package com.utc.dormitory_managing.service;
 
+import java.util.Optional;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +24,10 @@ import com.utc.dormitory_managing.dto.ResponseDTO;
 import com.utc.dormitory_managing.dto.RoomTypeDTO;
 import com.utc.dormitory_managing.dto.StudentDTO;
 import com.utc.dormitory_managing.entity.RoomType;
+import com.utc.dormitory_managing.entity.Staff;
 import com.utc.dormitory_managing.entity.Student;
 import com.utc.dormitory_managing.entity.User;
+import com.utc.dormitory_managing.repository.StaffRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.security.securityv2.JwtTokenProvider;
 
@@ -45,6 +49,9 @@ class AuthServiceImpl implements AuthService {
 
 	@Autowired
 	UserRepo userRepo;
+	
+	@Autowired
+	StaffRepo staffRepo;
 
 	@Autowired
 	UserService userService;
@@ -85,8 +92,19 @@ class AuthServiceImpl implements AuthService {
 
 			userRepo.save(user);
 
+			String id = "";
+			if (user.getRole().getRoleName().toUpperCase().equals("USER")) {
+				System.err.println("user");
+				StudentDTO student = studentService.findbyUser(user.getUserId());
+				if (student != null)
+					id = student.getStudentId();
+			}else {
+				Optional<Staff> staff = staffRepo.findByUser(user.getUserId());
+				if(staff.isPresent()) id = staff.get().getStaffId();
+			}
+			System.err.println(id);
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).accessToken(accessToken)
-					.refreshToken(refreshToken).build();
+					.refreshToken(refreshToken).data(id).build();
 
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -123,7 +141,7 @@ class AuthServiceImpl implements AuthService {
 	public ResponseDTO<String> signup(ContractDTO contractDTO) {
 		try {
 			if (!checkValidRoom(contractDTO.getStudent(), contractDTO.getRoomType()))
-				throw new BadRequestAlertException("Not Valid Room", "room", "valid");		
+				throw new BadRequestAlertException("Not Valid Room", "room", "valid");
 			studentService.create(contractDTO.getStudent());
 			contractService.create(contractDTO);
 			mailService.sendMailByNewAccount(contractDTO.getStudent());
