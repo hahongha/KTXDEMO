@@ -21,11 +21,16 @@ import com.utc.dormitory_managing.configuration.ApplicationProperties;
 import com.utc.dormitory_managing.dto.StaffDTO;
 import com.utc.dormitory_managing.dto.UserDTO;
 import com.utc.dormitory_managing.dto.UserResponse;
+import com.utc.dormitory_managing.entity.Role;
 import com.utc.dormitory_managing.entity.Staff;
 import com.utc.dormitory_managing.entity.User;
+import com.utc.dormitory_managing.repository.RoleRepo;
+import com.utc.dormitory_managing.repository.RoomRepo;
 import com.utc.dormitory_managing.repository.StaffRepo;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.utils.Utils;
+
+import jakarta.persistence.NoResultException;
 
 public interface StaffService {
 	StaffDTO create(StaffDTO StaffDTO);
@@ -43,7 +48,9 @@ class StaffServiceImpl implements StaffService {
 	private UserRepo userRepo;
 	@Autowired
 	private ApplicationProperties props;
-	
+
+	@Autowired
+	private RoleRepo roleRepo;
 	@Override
 	public StaffDTO create(StaffDTO staffDTO) {
 		try {
@@ -55,7 +62,9 @@ class StaffServiceImpl implements StaffService {
 			userDTO.setUsername(staff.getStaffEmail());
 			userDTO.setPassword(Utils.convertDateToString(staff.getDateOfBirth()));
 			userDTO.setExpired(Long.parseLong(props.getExpiredTime())*12);
+			Role role = roleRepo.findByRoleName("ROOT").orElseThrow(NoResultException::new);
 			User user = mapper.map(userDTO, User.class);
+			user.setRole(role);
 			userRepo.save(user);
 			staff.setUser(user);
 			StaffRepo.save(staff);

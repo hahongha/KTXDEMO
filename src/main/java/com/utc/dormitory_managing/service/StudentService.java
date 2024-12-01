@@ -255,8 +255,9 @@ class StudentServiceImpl implements StudentService {
 	public StudentDTO findbyUser(String userId) {
 		try {
 			Optional<Student> student = studentRepo.findByUser(userId);
-			if(student.isEmpty()) return null;
-			return new ModelMapper().map(student, StudentDTO.class);
+			if(student.isEmpty()) 
+				return null;
+			return new ModelMapper().map(student.get(), StudentDTO.class);
 	} catch (ResourceAccessException e) {
 		throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 	} catch (HttpServerErrorException | HttpClientErrorException e) {

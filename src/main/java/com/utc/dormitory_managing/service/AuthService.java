@@ -92,9 +92,9 @@ class AuthServiceImpl implements AuthService {
 
 			userRepo.save(user);
 
-			String id = "";
+			String id = "Not Found";
+			System.err.println(user.getUserId());
 			if (user.getRole().getRoleName().toUpperCase().equals("USER")) {
-				System.err.println("user");
 				StudentDTO student = studentService.findbyUser(user.getUserId());
 				if (student != null)
 					id = student.getStudentId();
