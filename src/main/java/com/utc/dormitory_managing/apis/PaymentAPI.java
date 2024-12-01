@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -22,32 +24,11 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
-
+//http://localhost:8080/api/payment/vn-pay?amount=100000&bankCode=NCB&studentId=12111111
     @GetMapping("/vn-pay")
     public ResponseObject<PaymentDTO.VNPayResponse> pay(HttpServletRequest request ) {
         return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request));
     }
-
-
-
-//    @GetMapping("/vn-pay-callback")
-//    public ResponseObject<PaymentDTO.VNPayResponse> payCallbackHandler(
-//            HttpServletRequest request, HttpServletRequest response,
-//            @RequestParam String vnp_ResponseCode) {
-//        String status = request.getParameter("vnp_ResponseCode");
-////      get params from vnpay
-//// fronend nhận và tạo màn hình thông báo thanh công nếu response code== 00=>> success
-////
-//
-//
-//        if (vnp_ResponseCode.equals("00")) {
-//            return new ResponseObject<>(HttpStatus.OK, "Success", new PaymentDTO.VNPayResponse("00", "Success", ""));
-//        } else {
-//            return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
-//        }
-//
-//
-
 
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<?> transaction
@@ -64,9 +45,21 @@ public class PaymentAPI {
             Payment savedPayment = paymentService.savePaymentResult(amount, OrderInfo);
             transactionDTO.setName("Chi tiet thanh toan");
             transactionDTO.setDescription("Thanh cong");
-            StringBuilder js   = new StringBuilder();
-            js.append("Tong tien: "+amount+"\n Nguoi thanh toan "+OrderInfo+"\n Thoi gian thanh toan "+vnp_PayDate);
-            transactionDTO.setData(js.toString());
+            // Định dạng thời gian theo chuỗi
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+            try {
+                // Chuyển đổi chuỗi thành đối tượng Date
+                Date vnpayDate = formatter.parse(vnp_PayDate);
+
+                // In ra kết quả
+                System.out.println("Ngày giờ sau khi ép kiểu: " + vnpayDate);
+                transactionDTO.setDate(vnpayDate);
+                transactionDTO.setAmount(Long.valueOf(amount));
+                transactionDTO.setOrderInfo(OrderInfo);
+            } catch (ParseException e) {
+                // Xử lý ngoại lệ nếu chuỗi không hợp lệ
+                System.out.println("Lỗi định dạng thời gian: " + e.getMessage());
+            }
             return new ResponseEntity<>(transactionDTO, HttpStatus.OK);
 
         }
