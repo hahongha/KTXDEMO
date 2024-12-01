@@ -126,6 +126,7 @@ class AuthServiceImpl implements AuthService {
 				throw new BadRequestAlertException("Not Valid Room", "room", "valid");		
 			studentService.create(contractDTO.getStudent());
 			contractService.create(contractDTO);
+			mailService.sendMailByNewAccount(contractDTO.getStudent());
 			return ResponseDTO.<String>builder().code(String.valueOf(HttpStatus.OK.value())).build();
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();

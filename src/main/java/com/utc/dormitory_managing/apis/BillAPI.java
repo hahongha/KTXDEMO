@@ -47,6 +47,13 @@ public class BillAPI {
 		return ResponseDTO.<BillDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(BillService.get(id))
 				.build();
 	}
+	
+	@GetMapping("/overdue")
+	public ResponseDTO<List<BillDTO>> getOverdue() {
+		return ResponseDTO.<List<BillDTO>>builder().code(String.valueOf(HttpStatus.OK.value())).data(BillService.overDue())
+				.build();
+	}
+	
 	@GetMapping("/getAll")
 	public ResponseDTO<List<BillDTO>> getAll() {
 		return ResponseDTO.<List<BillDTO>>builder().code(String.valueOf(HttpStatus.OK.value())).data(BillService.getAll())

@@ -21,6 +21,7 @@ import com.utc.dormitory_managing.dto.BuildingDTO;
 import com.utc.dormitory_managing.dto.FloorDTO;
 import com.utc.dormitory_managing.entity.Building;
 import com.utc.dormitory_managing.entity.Floor;
+import com.utc.dormitory_managing.entity.Room;
 import com.utc.dormitory_managing.repository.BuildingRepo;
 import com.utc.dormitory_managing.repository.FloorRepo;
 import com.utc.dormitory_managing.repository.RoomRepo;
@@ -71,11 +72,21 @@ class BuildingServiceImpl implements BuildingService {
 			
 			for (int i = 0; i < BuildingDTO.getNumberF(); i++) {
 				Floor f = new Floor();
-				f.setFloorId(UUID.randomUUID().toString());
+				f.setFloorId(""+i);
 				f.setFloorName(BuildingDTO.getBuildingName()+i);
 				f.setBuilding(Building);
 				floorRepo.save(f);
+				for (int j = 0; j < BuildingDTO.getNumberR(); j++) {
+					Room room = new Room();
+					room.setRoomId(""+j);
+					room.setRoomName(f.getFloorName()+j);
+					room.setFloor(f);
+					room.setRoomGender(Building.getBuildingGender());
+					room.setRoomStatus("ACTIVE");
+					roomRepo.save(room);
+				}
 			}
+			
 			return BuildingDTO;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();

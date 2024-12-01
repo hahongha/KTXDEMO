@@ -126,7 +126,7 @@ class MailServiceImpl implements MailService {
 			context.setVariable("tenKTX","GTVT");
 			context.setVariable("studentName",student.getFullname());
 			context.setVariable("username",student.getStudentId());
-			context.setVariable("userpassword", Utils.convertDateToString(studentDTO.getDateOfBirth()));
+			context.setVariable("userpassword", student.getStudentId());
 
 			String html = templateEngine.process("mailForNewStudent", context);
 

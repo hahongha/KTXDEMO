@@ -66,20 +66,30 @@ class UserServiceImpl implements UserService {
 		try {
 			ModelMapper mapper = new ModelMapper();
 			// creatte user
+			
+			if(userDTO.getExpired()<= 0 || userDTO.getExpired()==null) {
+				userDTO.setExpired(Long.parseLong(props.getExpiredTime())*12);
+			}
+			else {
+				userDTO.setExpired(Long.parseLong(props.getExpiredTime())* userDTO.getExpired());
+			}
 			User user = mapper.map(userDTO, User.class);
 			
 			if(userRepo.findByUsername(userDTO.getUsername()).isPresent()) throw new BadRequestAlertException("user is available", "user", "missing");
 			
+			
 			String user_id = UUID.randomUUID().toString().replaceAll("-", "");
 			user.setUserId(user_id);
 			user.setPassword(new BCryptPasswordEncoder().encode(userDTO.getPassword()));
-			if(userDTO.getExpired()<=0 || user.getExpired()==null) user.setExpired(Long.parseLong(props.getExpiredTime())*12);
-			else {
-				user.setExpired(Long.parseLong(props.getExpiredTime())* user.getExpired());
-			}
 			
-			Role role = roleRepo.findByRoleName("USER").orElseThrow(NoResultException::new);
-			user.setRole(role);
+			if(userDTO.getRole() == null) {
+				Role role = roleRepo.findByRoleName("USER").orElseThrow(NoResultException::new);
+				user.setRole(role);
+			}else {
+				System.err.println("Not Null");
+				Role role = roleRepo.findById(userDTO.getRole().getRoleId()).orElseThrow(NoResultException::new);
+				user.setRole(role);
+			}
 			// commit save
 			userRepo.save(user);
 			return mapper.map(user, UserDTO.class);
@@ -177,29 +187,6 @@ class UserServiceImpl implements UserService {
 	@Override
 	public ResponseDTO<List<UserDTO>> search(SearchDTO searchDTO) {
 		try {
-//			List<Sort.Order> orders = Optional.ofNullable(searchDTO.getOrders()).orElseGet(Collections::emptyList)
-//					.stream().map(order -> {
-//						if (order.getOrder().equals(SearchDTO.ASC))
-//							return Sort.Order.asc(order.getProperty());
-//
-//						return Sort.Order.desc(order.getProperty());
-//					}).collect(Collectors.toList());
-//
-//			Pageable pageable = PageRequest.of(searchDTO.getPage(), searchDTO.getSize(), Sort.by(orders));
-//
-////			Page<User> page = userRepo.search(searchDTO.getValue(), pageable);
-//
-//			List<UserDTO> userDTOList = new ArrayList<>();
-//
-//			for (User user : page.getContent()) {
-//				UserDTO userResponse = new ModelMapper().map(user, UserDTO.class);
-//				userDTOList.add(userResponse);
-//			}
-//
-//			ResponseDTO<List<UserDTO>> responseDTO = new ModelMapper().map(page, ResponseDTO.class);
-//			responseDTO.setData(userDTOList);
-//
-//			return responseDTO;
 			return null;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();

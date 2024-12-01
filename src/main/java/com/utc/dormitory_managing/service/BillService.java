@@ -22,6 +22,7 @@ import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.configuration.ApplicationProperties.NameClockRef;
 import com.utc.dormitory_managing.configuration.ApplicationProperties.StatusBilltRef;
 import com.utc.dormitory_managing.dto.BillDTO;
+import com.utc.dormitory_managing.dto.BillDTO2;
 import com.utc.dormitory_managing.dto.BillDetailDTO;
 import com.utc.dormitory_managing.dto.BillFormDTO;
 import com.utc.dormitory_managing.dto.ClockDTO;
@@ -44,10 +45,14 @@ import jakarta.persistence.NoResultException;
 public interface BillService {
 	BillDTO create(BillDTO billDTO);
 	BillDTO update(BillDTO billDTO);
+	
+	BillDTO2 update2(BillDTO2 billDTO);
 	Boolean delete(String id);
 	BillDTO get(String id);
 	List<BillDTO> getAll();
 	BillDTO createMonth(BillFormDTO billFormDTO);
+	
+	List<BillDTO> overDue();
 	
 }
 @Service
@@ -69,13 +74,27 @@ class BillServiceImpl implements BillService {
 	private BillDetailRepo billDetailRepo;
 	
 	@Override
-	public BillDTO create(BillDTO BillDTO) {
+	public BillDTO create(BillDTO billDTO) {
 		try {
 			ModelMapper mapper = new ModelMapper();
-			Bill Bill = mapper.map(BillDTO, Bill.class);
-			Bill.setBillId(UUID.randomUUID().toString());
-			billRepo.save(Bill);
-			return BillDTO;
+			Bill bill = mapper.map(billDTO, Bill.class);
+			bill.setBillId(UUID.randomUUID().toString());
+			if(billDTO.getStudentPay()!=null) {
+				Optional<Student> student = studentRepo.findById(billDTO.getBillId());
+				if(student.isEmpty()) {
+					bill.setStudentPay(null);
+					bill.setBillStatus(StatusBilltRef.WAITING.toString());
+				}
+				else {
+					bill.setStudentPay(student.get());
+					bill.setBillStatus(StatusBilltRef.COMPLETE.toString());
+				}
+			}else{
+				bill.setStudentPay(null);
+				bill.setBillStatus(StatusBilltRef.WAITING.toString());
+			}
+			billRepo.save(bill);
+			return mapper.map(bill, BillDTO.class);
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
@@ -91,7 +110,6 @@ class BillServiceImpl implements BillService {
 			if(BillOptional.isEmpty()) throw new BadRequestAlertException("Not Found Bill", "Bill", "missing");
 			Bill bill = BillOptional.get();
 			Student studentpay = new Student();
-//			System.err.println(bill.toString());
 			if(BillDTO.getStudentPay()!=null) {
 				studentpay = studentRepo.findById(BillDTO.getStudentPay().getStudentId()).orElseThrow(NoResultException::new);
 				if(studentpay.getRoom()!= bill.getRoom()) throw new BadRequestAlertException("Not Match Room", "bill", "match");
@@ -101,8 +119,6 @@ class BillServiceImpl implements BillService {
 			}
 			billRepo.save(bill);
 			BillDTO billDTO2 = mapper.map(bill, BillDTO.class);
-			System.err.println(bill.toString());
-			System.err.println(billDTO2.toString());
 			return billDTO2;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
@@ -132,8 +148,9 @@ class BillServiceImpl implements BillService {
 			Optional<Bill> BillOptional = billRepo.findById(id);
 			if(BillOptional.isEmpty()) throw new BadRequestAlertException("Not Found Bill", "Bill", "missing");
 			BillDTO billDTO = mapper.map(BillOptional.get(), BillDTO.class);
-			
+			RoomDTO room = mapper.map(BillOptional.get().getRoom(), RoomDTO.class);
 			List<BillDetail> bds = billDetailRepo.findByBill(BillOptional.get().getBillId());
+			billDTO.setRoomDTO(room);
 			if(bds.size()>0) {
 				List<BillDetailDTO> billDetailDTOs = new ArrayList<BillDetailDTO>();
 				for (BillDetail billDetail : bds) {
@@ -193,6 +210,10 @@ class BillServiceImpl implements BillService {
 		room.setLastWater(lW);
 		room.setPreWater(preW);
 		roomRepo.save(room);
+		
+		bill.setRoom(room);
+		
+		bill.setBillName(room.getRoomId() + "T"+ Utils.getMonth(new Date()));
 		billRepo.save(bill);
 		
 		
@@ -212,17 +233,41 @@ class BillServiceImpl implements BillService {
 		bd2.setValue(serviceW.getServicePrice()* bd2.getNumber());
 		bds.add(bd2);
 		bd2.setBill(bill);
+		
 		billDetailRepo.save(bd2);
 		billDetailRepo.save(bd1);
-		
-		return mapper.map(bill, BillDTO.class);
-		
+		return new ModelMapper().map(bill, BillDTO.class);
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
 		} catch (HttpServerErrorException | HttpClientErrorException e) {
 			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 		}
 		
+	}
+
+	@Override
+	public List<BillDTO> overDue() {
+		try {
+			List<Bill> bills = billRepo.findBillByStatus(StatusBilltRef.WAITING.toString());
+			if(bills.size() ==0) return null;
+			else {
+				for (Bill bill : bills) {
+					bill.setBillStatus(StatusBilltRef.OVERDUE.toString());
+					billRepo.save(bill);
+				}
+			}
+			return bills.stream().map(b -> new ModelMapper().map(b, BillDTO.class)).collect(Collectors.toList());
+		}catch (ResourceAccessException e) {
+			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
+		} catch (HttpServerErrorException | HttpClientErrorException e) {
+			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
+		}
+	}
+
+	@Override
+	public BillDTO2 update2(BillDTO2 billDTO) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

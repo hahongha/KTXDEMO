@@ -80,14 +80,15 @@ class ContractServiceImpl implements ContractService {
 			}else contract.setStaff(null);
 			RoomType roomType = roomTypeRepo.findById(contractDTO.getRoomType().getRoomTypeId()).orElseThrow(NoResultException::new);
 			contract.setRoomType(roomType);
-			Room room = roomRepo.findByRoomValid(roomType.getRoomTypeId()).orElseThrow(NoResultException::new);
-			room.setRoomNumber(student.getRoom().getRoomNumber()+1);
-			if(room.getRoomNumber()>= roomType.getRoomTypeNumber()) {
-				room.setRoomValid(false);
+			if(student.getRoom()==null) {
+				Room room = roomRepo.findByRoomValid(roomType.getRoomTypeId()).orElseThrow(NoResultException::new);
+				room.setRoomNumber(room.getRoomNumber()+1);
+				if(room.getRoomNumber()>= roomType.getRoomTypeNumber()) {
+					room.setRoomValid(false);
+				}
+				student.setRoom(room);
+				studentRepo.save(student);
 			}
-			System.err.println(room.getRoomId());
-//			student.setRoom(room);
-//			studentRepo.save(student);
 			contract.setContractId(UUID.randomUUID().toString());
 			contract.setContractStatus(StatusContractRef.ACTIVE.toString());
 			contract.setContractRent(roomType.getRoomTypePrice()- contract.getReduceCost());
@@ -132,7 +133,10 @@ class ContractServiceImpl implements ContractService {
 		try {
 			Optional<Contract> ContractOptional = ContractRepo.findById(id);
 			if(ContractOptional.isEmpty()) return false;
-			ContractRepo.deleteById(id);
+//			ContractRepo.deleteById(id);
+			Contract contract = ContractOptional.get();
+			contract.setContractStatus(StatusContractRef.SUSPEND.toString());
+			ContractRepo.save(contract);
 			return true;
 		} catch (ResourceAccessException e) {
 			throw Problem.builder().withStatus(Status.EXPECTATION_FAILED).withDetail("ResourceAccessException").build();
