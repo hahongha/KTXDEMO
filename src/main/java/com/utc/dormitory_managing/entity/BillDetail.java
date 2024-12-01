@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "billDetail")
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper= false)
+@EqualsAndHashCode(callSuper= false, exclude = {"services"})
 public class BillDetail {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -15,7 +15,7 @@ public class BillDetailDTO {
 	
 	private Services services;
 	
-	private Bill bill;
+	private BillDTO bill;
 	
 	private int number;
 	

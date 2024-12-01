@@ -21,6 +21,8 @@ public class BillDTO {
 	
 	private String billDescription;
 	
+	private RoomDTO roomDTO;
+	
 	private StudentDTO studentPay;
 	
 	private StaffDTO staff;
@@ -29,5 +31,5 @@ public class BillDTO {
 	
 	private Long billValue;
 	
-	private List<BillDetail> billDetails;
+	private List<BillDetailDTO> billDetails;
 }

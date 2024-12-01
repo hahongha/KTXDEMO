@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.utc.dormitory_managing.apis.error.BadRequestAlertException;
 import com.utc.dormitory_managing.dto.ResponseDTO;
+import com.utc.dormitory_managing.dto.Building2DTO;
 import com.utc.dormitory_managing.dto.BuildingDTO;
 import com.utc.dormitory_managing.service.BuildingService;
 
@@ -32,6 +33,13 @@ public class BuildingAPI {
 	public ResponseDTO<BuildingDTO> create(@RequestBody BuildingDTO BuildingDTO) throws URISyntaxException {
 		BuildingService.create(BuildingDTO);
 		return ResponseDTO.<BuildingDTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(BuildingDTO).build();
+
+	}
+	
+	@PostMapping("/test")
+	public ResponseDTO<Building2DTO> create2(@RequestBody Building2DTO BuildingDTO) throws URISyntaxException {
+		BuildingService.create2(BuildingDTO);
+		return ResponseDTO.<Building2DTO>builder().code(String.valueOf(HttpStatus.OK.value())).data(BuildingDTO).build();
 
 	}
 

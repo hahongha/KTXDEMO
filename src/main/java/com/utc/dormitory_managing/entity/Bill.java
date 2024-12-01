@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "bill")
 @AllArgsConstructor
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false, exclude = {"room","studentPay", "staff","billDetails"})
+@EqualsAndHashCode(callSuper = false, exclude = {"room","studentPay", "staff"})
 public class Bill extends BaseModel {
 	private static final long serialVersionUID = 1L;
 	
@@ -60,8 +60,5 @@ public class Bill extends BaseModel {
 	
 	@Column
 	private Date dayPay;
-	
-	@OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BillDetail> billDetails;
 	
 }
