@@ -77,7 +77,7 @@ class RoomServiceImpl implements RoomService {
 			Floor floor = floorRepo.findById(RoomDTO.getFloor().getFloorId()).orElseThrow(NoResultException::new);
 			Room Room = mapper.map(RoomDTO, Room.class);
 			Room.setRoomType(roomType);
-			Room.setFloor(floor);
+			Room.setFloor(floor); 
 			Room.setRoomGender(floor.getBuilding().getBuildingGender());
 			RoomRepo.save(Room);
 			return RoomDTO;
