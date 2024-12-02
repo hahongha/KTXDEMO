@@ -88,5 +88,50 @@ public class UserAPI {
 		userService.deleteAll(ids);
 		return ResponseDTO.<Void>builder().code(String.valueOf(HttpStatus.OK.value())).build();
 	}
-	
+	@PostMapping("/forgot-password")
+	public ResponseDTO<Void> forgotPassword(@RequestBody ForgotPasswordRequestDTO request) {
+		try {
+			userService.processForgotPassword(request.getEmail());
+			return ResponseDTO.<Void>builder()
+					.code(String.valueOf(HttpStatus.OK.value()))
+					.message("OTP sent successfully")
+					.build();
+		} catch (Exception e) {
+			return ResponseDTO.<Void>builder()
+					.code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+					.message("Email not found")
+					.build();
+		}
+	}
+
+	@PostMapping("/validate-otp")
+	public ResponseDTO<Void> validateOtp(@RequestBody OtpValidationDTO request) {
+		boolean isValid = userService.validateOtp(request.getEmail(), request.getOtp());
+		if (isValid) {
+			return ResponseDTO.<Void>builder()
+					.code(String.valueOf(HttpStatus.OK.value()))
+					.message("OTP validated successfully")
+					.build();
+		}
+		return ResponseDTO.<Void>builder()
+				.code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+				.message("Invalid OTP")
+				.build();
+	}
+
+	@PostMapping("/reset-password")
+	public ResponseDTO<Void> resetPassword(@RequestBody NewPasswordDTO request) {
+		try {
+			userService.resetPassword(request);
+			return ResponseDTO.<Void>builder()
+					.code(String.valueOf(HttpStatus.OK.value()))
+					.message("Password reset successfully")
+					.build();
+		} catch (Exception e) {
+			return ResponseDTO.<Void>builder()
+					.code(String.valueOf(HttpStatus.BAD_REQUEST.value()))
+					.message("Failed to reset password")
+					.build();
+		}
+	}
 }
