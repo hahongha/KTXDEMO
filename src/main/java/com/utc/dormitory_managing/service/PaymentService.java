@@ -34,11 +34,11 @@ public class PaymentService  {
 
     private final VNPAYConfig vnPayConfig;
 
-   public PaymentDTO.VNPayResponse createVnPayPayment(HttpServletRequest request, String amount, String studentId ) {
+   public PaymentDTO.VNPayResponse createVnPayPayment(HttpServletRequest request, String amount, String studentId,String billId ) {
         long amount1 = Long.parseLong(amount)*100L;
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount1));
-        vnpParamsMap.put("vnp_OrderInfo", "MSV_"+studentId);
+        vnpParamsMap.put("vnp_OrderInfo", studentId+"_"+billId);
 //        if (bankCode != null && !bankCode.isEmpty()) {
 //            vnpParamsMap.put("vnp_BankCode", bankCode);
 //        }
@@ -57,4 +57,25 @@ public class PaymentService  {
                 .message("success")
                 .paymentUrl(paymentUrl).build();
     }
+    // Get all payments
+    public List<Payment> getAllPayments() {
+        return paymentRepository.findAll();
+    }
+
+    // Get payment by id
+    public Payment getPaymentById(Long id) {
+        return paymentRepository.findById(id).orElse(null);
+    }
+
+    // Delete payment
+    public boolean deletePayment(Long id) {
+        if (paymentRepository.existsById(id)) {
+            paymentRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+
+
 }
