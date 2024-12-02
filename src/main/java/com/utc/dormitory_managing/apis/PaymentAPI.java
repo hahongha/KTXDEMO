@@ -28,7 +28,6 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
-//http://localhost:8080/api/payment/vn-pay?amount=100000&studentId=12111111
    @GetMapping("/vn-pay")
     public ResponseObject<PaymentDTO.VNPayResponse> pay
     (
