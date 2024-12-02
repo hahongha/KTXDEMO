@@ -126,5 +126,32 @@ public class PaymentAPI {
                     .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
         }
     }
+    @GetMapping("/search2")
+    public ResponseObject<List<Payment>> searchPaymentTerm(
+            @RequestParam(required = false) String searchTerm
+    ) {
+        try {
+            List<Payment> payments = paymentService.searchPaymentTerm(searchTerm);
+            if (payments.isEmpty()) {
+                return new ResponseObject<>(
+                        HttpStatus.OK,
+                        "No payments found for the search term",
+                        Collections.emptyList()
+                );
+            }
+            return new ResponseObject<>(
+                    HttpStatus.OK,
+                    "Payments found successfully",
+                    payments
+            );
+        } catch (Exception e) {
+            return new ResponseObject<>(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error searching payments: " + e.getMessage(),
+                    null
+            );
+        }
+    }
+    
 
 }
