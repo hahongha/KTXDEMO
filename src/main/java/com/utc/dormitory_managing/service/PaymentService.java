@@ -75,6 +75,12 @@ public class PaymentService  {
         }
         return false;
     }
+    public List<Payment> searchPaymentTerm(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return paymentRepository.searchByTerm(searchTerm);
+    }
 
 
 
