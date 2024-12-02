@@ -62,9 +62,6 @@ public class PaymentAPI {
             try {
                 // Chuyển đổi chuỗi thành đối tượng Date
                 Date vnpayDate = formatter.parse(vnp_PayDate);
-
-                // In ra kết quả
-                System.out.println("Ngày giờ sau khi ép kiểu: " + vnpayDate);
                 transactionDTO.setDate(vnpayDate);
                 transactionDTO.setAmount(Long.valueOf(amount));
                 transactionDTO.setOrderInfo(OrderInfo);
