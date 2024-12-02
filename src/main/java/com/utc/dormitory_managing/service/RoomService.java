@@ -57,6 +57,7 @@ class RoomServiceImpl implements RoomService {
 			Room.setRoomId(UUID.randomUUID().toString());
 			Room.setRoomType(roomType);
 			Room.setFloor(floor);
+			Room.setRoomGender(floor.getBuilding().getBuildingGender());
 			RoomRepo.save(Room);
 			return RoomDTO;
 		} catch (ResourceAccessException e) {
@@ -72,7 +73,12 @@ class RoomServiceImpl implements RoomService {
 			ModelMapper mapper = new ModelMapper();
 			Optional<Room> RoomOptional = RoomRepo.findById(RoomDTO.getRoomId());
 			if(RoomOptional.isEmpty()) throw new BadRequestAlertException("Not Found Room", "Room", "missing");
+			RoomType roomType = roomTypeRepo.findById(RoomDTO.getRoomType().getRoomTypeId()).orElseThrow(NoResultException::new);
+			Floor floor = floorRepo.findById(RoomDTO.getFloor().getFloorId()).orElseThrow(NoResultException::new);
 			Room Room = mapper.map(RoomDTO, Room.class);
+			Room.setRoomType(roomType);
+			Room.setFloor(floor);
+			Room.setRoomGender(floor.getBuilding().getBuildingGender());
 			RoomRepo.save(Room);
 			return RoomDTO;
 		} catch (ResourceAccessException e) {
