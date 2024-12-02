@@ -30,11 +30,15 @@ public class PaymentAPI {
     (
             HttpServletRequest request,
             @RequestParam(value = "amount" ) String amount,
-            @RequestParam(value = "studentId" ) String studentId
+            @RequestParam(value = "studentId" ) String studentId,
+            @RequestParam(value = "billId" ) String billId
     )
     {
-        return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request, amount, studentId));
+        return new ResponseObject<>(HttpStatus.OK, "Success", paymentService.createVnPayPayment(request, amount, studentId,billId));
     }
+    @Autowired
+    private final BillService billService;
+   private final StudentService studentService;
 
     @GetMapping("/vn-pay-callback")
     public ResponseEntity<?> transaction
@@ -72,6 +76,55 @@ public class PaymentAPI {
         else
         {
             return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
+        }
+    }
+    // Get all payments
+    @GetMapping("/getAll")
+    public ResponseEntity<ResponseObject<List<Payment>>> getAllPayments() {
+        try {
+            List<Payment> payments = paymentService.getAllPayments();
+            return ResponseEntity.ok(
+                    new ResponseObject<>(HttpStatus.OK, "Get all payments successfully", payments)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
+        }
+    }
+
+    // Get payment by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseObject<Payment>> getPaymentById(@PathVariable Long id) {
+        try {
+            Payment payment = paymentService.getPaymentById(id);
+            if (payment != null) {
+                return ResponseEntity.ok(
+                        new ResponseObject<>(HttpStatus.OK, "Get payment successfully", payment)
+                );
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject<>(HttpStatus.NOT_FOUND, "Payment not found", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
+        }
+    }
+
+    // Delete payment
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ResponseObject<Void>> deletePayment(@PathVariable Long id) {
+        try {
+            boolean deleted = paymentService.deletePayment(id);
+            if (deleted) {
+                return ResponseEntity.ok(
+                        new ResponseObject<>(HttpStatus.OK, "Payment deleted successfully", null)
+                );
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject<>(HttpStatus.NOT_FOUND, "Payment not found", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
         }
     }
 
