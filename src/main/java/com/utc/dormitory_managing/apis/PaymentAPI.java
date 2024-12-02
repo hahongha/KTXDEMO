@@ -1,13 +1,15 @@
 package com.utc.dormitory_managing.apis;
 
-import com.utc.dormitory_managing.dto.PaymentDTO;
-import com.utc.dormitory_managing.dto.ResponseObject;
-import com.utc.dormitory_managing.dto.TransactionDTO;
+import com.utc.dormitory_managing.dto.*;
 import com.utc.dormitory_managing.entity.Payment;
+import com.utc.dormitory_managing.service.BillService;
 import com.utc.dormitory_managing.service.PaymentService;
+import com.utc.dormitory_managing.service.StudentService;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/payment")
@@ -24,7 +27,6 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
-//http://localhost:8080/api/payment/vn-pay?amount=100000&studentId=12111111
    @GetMapping("/vn-pay")
     public ResponseObject<PaymentDTO.VNPayResponse> pay
     (
