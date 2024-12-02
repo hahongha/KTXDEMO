@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
+//http://localhost:8080/api/payment/vn-pay?amount=100000&studentId=12111111
    @GetMapping("/vn-pay")
     public ResponseObject<PaymentDTO.VNPayResponse> pay
     (
@@ -43,38 +45,40 @@ public class PaymentAPI {
    private final StudentService studentService;
 
     @GetMapping("/vn-pay-callback")
-    public ResponseEntity<?> transaction
-            (
-                    @RequestParam(value = "vnp_Amount" ) String amount,
-                    @RequestParam(value = "vnp_OrderInfo" ) String OrderInfo,
-                    @RequestParam(value = "vnp_ResponseCode" ) String ResponseCode,
-                    @RequestParam(value = "vnp_PayDate" ) String vnp_PayDate
-            )
-    {
-        TransactionDTO transactionDTO = new TransactionDTO();
-        if(ResponseCode.equals("00"))
-        {
-            Payment savedPayment = paymentService.savePaymentResult(amount, OrderInfo);
-            transactionDTO.setName("Chi tiet thanh toan");
-            transactionDTO.setDescription("Thanh cong");
-            // Định dạng thời gian theo chuỗi
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-            try {
-                // Chuyển đổi chuỗi thành đối tượng Date
-                Date vnpayDate = formatter.parse(vnp_PayDate);
-                transactionDTO.setDate(vnpayDate);
-                transactionDTO.setAmount(Long.valueOf(amount));
-                transactionDTO.setOrderInfo(OrderInfo);
-            } catch (ParseException e) {
-                // Xử lý ngoại lệ nếu chuỗi không hợp lệ
-                System.out.println("Lỗi định dạng thời gian: " + e.getMessage());
-            }
-            return new ResponseEntity<>(transactionDTO, HttpStatus.OK);
+    public ResponseEntity<?> transaction(
+            @RequestParam(value = "vnp_Amount") String amount,
+            @RequestParam(value = "vnp_OrderInfo") String OrderInfo,
+            @RequestParam(value = "vnp_ResponseCode") String ResponseCode,
+            @RequestParam(value = "vnp_PayDate") String vnp_PayDate
+    ) {
+        try {
+            if (ResponseCode.equals("00")) {
+                Payment savedPayment = paymentService.savePaymentResult(amount, OrderInfo);
 
-        }
-        else
-        {
-            return new ResponseObject<>(HttpStatus.BAD_REQUEST, "Failed", null);
+                // Create transaction response
+                TransactionDTO transactionDTO = new TransactionDTO();
+                transactionDTO.setName("Chi tiet thanh toan");
+                transactionDTO.setDescription("Thanh cong");
+
+                // Parse and set payment date
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+                try {
+                    Date vnpayDate = formatter.parse(vnp_PayDate);
+                    transactionDTO.setDate(vnpayDate);
+                    transactionDTO.setAmount(Long.valueOf(amount));
+                    transactionDTO.setOrderInfo(OrderInfo);
+                } catch (ParseException e) {
+                    System.out.println("Lỗi định dạng thời gian: " + e.getMessage());
+                }
+
+                return ResponseEntity.ok(transactionDTO);
+            } else {
+                return ResponseEntity.badRequest()
+                        .body(new ResponseObject<>(HttpStatus.BAD_REQUEST, "Payment Failed", null));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
         }
     }
     // Get all payments
@@ -126,7 +130,8 @@ public class PaymentAPI {
                     .body(new ResponseObject<>(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), null));
         }
     }
-    @GetMapping("/search2")
+
+   @GetMapping("/search2")
     public ResponseObject<List<Payment>> searchPaymentTerm(
             @RequestParam(required = false) String searchTerm
     ) {
@@ -152,6 +157,5 @@ public class PaymentAPI {
             );
         }
     }
-    
 
 }
