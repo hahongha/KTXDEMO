@@ -12,4 +12,6 @@ import com.utc.dormitory_managing.entity.Staff;
 public interface StaffRepo extends JpaRepository<Staff, String> {
 	@Query("SELECT a from Staff a where a.user.userId = :x")
 	Optional<Staff> findByUser(@Param("x") String userId);
+	@Query("SELECT s FROM Staff s WHERE s.staffEmail = :x")
+	Optional<Staff> findByStaffEmail(@Param("x") String email);
 }

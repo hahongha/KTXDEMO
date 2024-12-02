@@ -1,10 +1,13 @@
 package com.utc.dormitory_managing.service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.utc.dormitory_managing.dto.NewPasswordDTO;
+import com.utc.dormitory_managing.entity.Staff;
+import com.utc.dormitory_managing.entity.Student;
+import com.utc.dormitory_managing.repository.StaffRepo;
+import com.utc.dormitory_managing.repository.StudentRepo;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,6 +47,9 @@ public interface UserService {
 	UserDTO update(UserDTO userDTO);
 	
 	ResponseDTO<List<UserDTO>> search(SearchDTO searchDTO);
+	void processForgotPassword(String email);
+	boolean validateOtp(String email, String otp);
+	void resetPassword(NewPasswordDTO request);
 	
 }
 
@@ -58,8 +64,16 @@ class UserServiceImpl implements UserService {
 	
 	@Autowired
 	private RoleRepo roleRepo;
+	@Autowired
+	private StudentRepo studentRepo;
 
+	@Autowired
+	private StaffRepo staffRepo;
 
+	@Autowired
+	private MailService mailService;
+
+	private Map<String, String> otpStorage = new HashMap<>(); // In production use Redis/Cache
 	@Override
 	@Transactional
 	public UserDTO create(UserDTO userDTO) {
@@ -194,7 +208,79 @@ class UserServiceImpl implements UserService {
 			throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 		}
 	}
-	
-	
 
+	//forgot
+	public void processForgotPassword(String email) {
+		// Check in student table
+		Optional<Student> student = studentRepo.findByStudentEmail(email);
+		if (student.isPresent()) {
+			sendOtp(email, student.get().getUser());
+			return;
+		}
+
+		// Check in staff table
+		Optional<Staff> staff = staffRepo.findByStaffEmail(email);
+		if (staff.isPresent()) {
+			sendOtp(email, staff.get().getUser());
+			return;
+		}
+
+		throw new BadRequestAlertException("Email not found", "User", "email_not_found");
+	}
+
+	private void sendOtp(String email, User user) {
+		String otp = generateOtp();
+		otpStorage.put(email, otp);
+
+		// Use new mail method
+		mailService.sendOtpEmail(
+				email,
+				"Password Reset OTP",
+				"Your OTP for password reset is: " + otp
+		);
+	}
+
+	private String generateOtp() {
+		return String.format("%06d", new Random().nextInt(999999));
+	}
+
+	public boolean validateOtp(String email, String otp) {
+		String storedOtp = otpStorage.get(email);
+		return storedOtp != null && storedOtp.equals(otp);
+	}
+
+	@Transactional
+	public void resetPassword(NewPasswordDTO request) {
+		if (!validateOtp(request.getEmail(), request.getOtp())) {
+			throw new BadRequestAlertException("Invalid OTP", "User", "invalid_otp");
+		}
+
+		// Find user by email through student or staff
+		User user = findUserByEmail(request.getEmail());
+		if (user == null) {
+			throw new BadRequestAlertException("User not found", "User", "user_not_found");
+		}
+
+		// Update password
+		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+		user.setPassword(encoder.encode(request.getNewPassword()));
+		userRepo.save(user);
+
+		// Clear OTP
+		otpStorage.remove(request.getEmail());
+	}
+
+	private User findUserByEmail(String email) {
+		Optional<Student> student = studentRepo.findByStudentEmail(email);
+		if (student.isPresent()) {
+			return student.get().getUser();
+		}
+
+		Optional<Staff> staff = staffRepo.findByStaffEmail(email);
+		if (staff.isPresent()) {
+			return staff.get().getUser();
+		}
+
+		return null;
+	}
 }

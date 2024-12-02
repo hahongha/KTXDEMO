@@ -38,7 +38,6 @@ public class PaymentService  {
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
 
         //build query url
-
         String queryUrl = VNPayUtil.getPaymentURL(vnpParamsMap, true);
         String hashData = VNPayUtil.getPaymentURL(vnpParamsMap, false);
         String vnpSecureHash = VNPayUtil.hmacSHA512(vnPayConfig.getSecretKey(), hashData);
@@ -73,5 +72,4 @@ public class PaymentService  {
         }
         return paymentRepository.searchByTerm(searchTerm);
     }
-
 }

@@ -5,18 +5,14 @@ import com.utc.dormitory_managing.entity.Payment;
 import com.utc.dormitory_managing.service.BillService;
 import com.utc.dormitory_managing.service.PaymentService;
 import com.utc.dormitory_managing.service.StudentService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -28,6 +24,7 @@ public class PaymentAPI {
 
 
     private final PaymentService paymentService;
+
    @GetMapping("/vn-pay")
     public ResponseObject<PaymentDTO.VNPayResponse> pay
     (
