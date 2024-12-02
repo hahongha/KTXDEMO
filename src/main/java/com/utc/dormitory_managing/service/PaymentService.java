@@ -1,9 +1,6 @@
 package com.utc.dormitory_managing.service;
-
 import com.utc.dormitory_managing.configuration.VNPAYConfig;
-import com.utc.dormitory_managing.dto.PaymentDTO;
-import com.utc.dormitory_managing.dto.RoomTypeDTO;
-import com.utc.dormitory_managing.dto.StudentDTO;
+import com.utc.dormitory_managing.dto.*;
 import com.utc.dormitory_managing.entity.Payment;
 import com.utc.dormitory_managing.repository.PaymentRepo;
 import com.utc.dormitory_managing.utils.VNPayUtil;
@@ -19,10 +16,11 @@ import java.util.*;
 public class PaymentService  {
     private final PaymentRepo paymentRepository;
     private final HttpServletRequest httpServletRequest;
+    private final VNPAYConfig vnPayConfig;
 
     public Payment savePaymentResult(String amount, String orderInfo) {
+
         Payment payment = Payment.builder()
-//                .orderId(orderId)
                 .amount(amount)
                 .paymentInfo(orderInfo)
                 .paymentTime(LocalDateTime.now())
@@ -31,17 +29,11 @@ public class PaymentService  {
         return paymentRepository.save(payment);
     }
 
-
-    private final VNPAYConfig vnPayConfig;
-
    public PaymentDTO.VNPayResponse createVnPayPayment(HttpServletRequest request, String amount, String studentId,String billId ) {
         long amount1 = Long.parseLong(amount)*100L;
         Map<String, String> vnpParamsMap = vnPayConfig.getVNPayConfig();
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount1));
         vnpParamsMap.put("vnp_OrderInfo", studentId+"_"+billId);
-//        if (bankCode != null && !bankCode.isEmpty()) {
-//            vnpParamsMap.put("vnp_BankCode", bankCode);
-//        }
         vnpParamsMap.put("vnp_BankCode", "NCB");
         vnpParamsMap.put("vnp_IpAddr", VNPayUtil.getIpAddress(request));
 
@@ -81,7 +73,5 @@ public class PaymentService  {
         }
         return paymentRepository.searchByTerm(searchTerm);
     }
-
-
 
 }
