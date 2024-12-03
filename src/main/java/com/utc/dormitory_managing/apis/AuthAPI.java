@@ -5,7 +5,9 @@ import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +17,7 @@ import org.zalando.problem.Problem;
 import org.zalando.problem.Status;
 
 import com.utc.dormitory_managing.dto.ContractDTO;
+import com.utc.dormitory_managing.dto.FloorDTO;
 import com.utc.dormitory_managing.dto.LoginRequest;
 import com.utc.dormitory_managing.dto.ResponseDTO;
 import com.utc.dormitory_managing.dto.RoomTypeDTO;
@@ -23,6 +26,7 @@ import com.utc.dormitory_managing.dto.UserDTO;
 import com.utc.dormitory_managing.entity.User;
 import com.utc.dormitory_managing.repository.UserRepo;
 import com.utc.dormitory_managing.service.AuthService;
+import com.utc.dormitory_managing.service.StudentService;
 import com.utc.dormitory_managing.service.UserService;
 
 import jakarta.validation.Valid;
@@ -38,6 +42,8 @@ public class AuthAPI {
 
 	@Autowired
 	AuthService authService;
+	@Autowired
+	StudentService studentService;
 
 	@PostMapping("/signin")
 	public ResponseDTO<String> signin(@Valid @RequestBody LoginRequest loginRequest) {
@@ -76,5 +82,26 @@ public class AuthAPI {
 			throw Problem.builder().withStatus(Status.INTERNAL_SERVER_ERROR).withDetail("SERVER ERROR").build();
 		}
 	}
+	
+	@PostMapping("/checkEmail/{email}")
+	public ResponseDTO<Boolean> checkEmail(@PathVariable(value = "email") String email){
+		return ResponseDTO.<Boolean>builder().code(String.valueOf(HttpStatus.OK.value())).data(studentService.existsByEmail(email))
+				.build();
+	}
+	
+	@PostMapping("/checkStudentId/{studentId}")
+	public ResponseDTO<Boolean> checkStudentId(@PathVariable(value = "studentId") String studentId){
+		return ResponseDTO.<Boolean>builder().code(String.valueOf(HttpStatus.OK.value())).data(studentService.existsById(studentId))
+				.build();
+	}
+	
+	@PostMapping("/checkStudentIdentification/{id}")
+	public ResponseDTO<Boolean> checkStudentIdentification(@PathVariable(value = "id") String id){
+		return ResponseDTO.<Boolean>builder().code(String.valueOf(HttpStatus.OK.value())).data(studentService.existsBystudentIdentification(id))
+				.build();
+	}
+	
+	
+	
 	
 }

@@ -50,6 +50,10 @@ public interface StudentService {
 	ResponseDTO<List<Student>> search(SearchDTO searchDTO);
 	List<StudentDTO> findbyRoom(RoomDTO room);
 	StudentDTO findbyUser(String userId);
+	Boolean existsByEmail(String email);
+	Boolean existsByPhone(String phone);
+	Boolean existsById(String id);
+	Boolean existsBystudentIdentification(String id);
 }
 @Service
 class StudentServiceImpl implements StudentService {
@@ -263,6 +267,26 @@ class StudentServiceImpl implements StudentService {
 	} catch (HttpServerErrorException | HttpClientErrorException e) {
 		throw Problem.builder().withStatus(Status.SERVICE_UNAVAILABLE).withDetail("SERVICE_UNAVAILABLE").build();
 	}
+	}
+
+	@Override
+	public Boolean existsByEmail(String email) {
+		return studentRepo.existsByStudentEmail(email);
+	}
+
+	@Override
+	public Boolean existsByPhone(String phone) {
+		return studentRepo.existsByPhoneNumber(phone);
+	}
+
+	@Override
+	public Boolean existsById(String id) {
+		return studentRepo.existsByStudentId(id);
+	}
+
+	@Override
+	public Boolean existsBystudentIdentification(String id) {
+		return studentRepo.existsByStudentIdentification(id);
 	}
 
 }

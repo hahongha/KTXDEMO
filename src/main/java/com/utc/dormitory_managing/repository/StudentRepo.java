@@ -22,5 +22,14 @@ public interface StudentRepo extends JpaRepository<Student, String> {
 	@Query("SELECT a from Student a where a.user.userId = :x")
 	Optional<Student> findByUser(@Param("x") String userId);
 	
+	Boolean existsByStudentEmail(String studentEmail);
+	
+	Boolean existsByStudentId(String studentId);
+	
+	Boolean existsByPhoneNumber(String phoneNumber);
+	
+	Boolean existsByStudentIdentification(String id);
+	
+	
 	
 }

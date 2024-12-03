@@ -107,6 +107,7 @@ class BillServiceImpl implements BillService {
 			Optional<Bill> BillOptional = billRepo.findById(BillDTO.getBillId());
 			if(BillOptional.isEmpty()) throw new BadRequestAlertException("Not Found Bill", "Bill", "missing");
 			Bill bill = BillOptional.get();
+			Room room = bill.getRoom();
 			Student studentpay = new Student();
 			if(BillDTO.getStudentPay()!=null) {
 				studentpay = studentRepo.findById(BillDTO.getStudentPay().getStudentId()).orElseThrow(NoResultException::new);
